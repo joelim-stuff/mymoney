@@ -1,0 +1,2 @@
+// Paste your Supabase values between the quotes
+const SB_URL="https://xvwykmpsbfzbphpadglv.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2d3lrbXBzYmZ6YnBocGFkZ2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5Njk4NTYsImV4cCI6MjEwODU0NTg1Nn0.9ENh1iIc4BjbqK4PHJsOj4pkYRQRho8kcB353sitv5U";
