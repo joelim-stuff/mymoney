@@ -46,6 +46,12 @@ nav button{flex:1;border:0;border-radius:0;background:none;padding:12px 0;color:
 h3{display:flex;justify-content:space-between}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.wk{text-align:center;font-size:11px;color:var(--mut)}
 .day{aspect-ratio:1;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-radius:8px;font-size:13px;line-height:1.1}.day.has{background:var(--pri);color:#fff;border-color:var(--pri)}.day.tdy{outline:2px solid var(--wn)}.day small{color:inherit;font-size:11px;font-weight:700}.day em{font-size:9px;font-style:normal;opacity:.8}
+.pill.auto{background:#2563eb}.row.auto{border-left-color:#2563eb}.c.auto{color:#2563eb}.dot.auto{background:#2563eb}
+.gt{background:var(--pri);color:#fff;border-radius:14px;padding:14px;margin-bottom:10px}.gt small{color:#fff;opacity:.85;display:block}.gt>b{font-size:24px}
+.fr{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:3px}.gt .fr span{color:#fff}
+.fold{display:flex;align-items:center;gap:12px;background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px}.fi{font-size:30px}.fm{flex:1}.fm b{font-size:16px;display:block}.ar{font-size:24px;color:var(--mut)}
+.rl{display:grid;grid-template-columns:1.6fr 1fr 1fr auto;gap:6px;margin-top:6px}.rl input{padding:8px;min-width:0}.rl button{padding:6px 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tk{width:22px;height:22px;flex:none;margin:0}
 </style></head><body>
 <div id="app"></div>
 <nav>
@@ -63,15 +69,20 @@ const rm=n=>'RM '+(+n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximu
 const uid=()=>Math.random().toString(36).slice(2,9);
 const now=new Date(),KEY='mymoney_v1';
 const today=()=>`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-let V={tab:'bills',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
+let V={tab:'bills',g:null,sv:'cal',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
 const ym=(y=V.y,m=V.m)=>y+'-'+pad(m+1);
 
 const PLAT=["MBB", "OCBC 360", "OCBC Master", "UOB Visa", "HL", "RHB", "TNG", "Bank transfer", "Cash"];
 const HIST={"bills":[{"id":"loan45","name":"Housing loan (45)","grp":"inst","type":"fixed","amt":2681,"due":4,"via":"MBB","det":"Acct 1798 1007 455","end":"","adhoc":false,"card":"","from":"2026-10"},{"id":"perai","name":"Perai Utama rental","grp":"inst","type":"fixed","amt":360,"due":1,"via":"","det":"Rental continues until Apr 2028","end":"2028-04","adhoc":false,"card":"","from":"2026-11"},{"id":"ins1","name":"My Insurance 1","grp":"inst","type":"fixed","amt":258.33,"due":23,"via":"OCBC Master","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"ins2","name":"My Insurance 2","grp":"inst","type":"fixed","amt":333.33,"due":18,"via":"OCBC Master","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"sgins","name":"SG Insurance","grp":"inst","type":"var","amt":236,"due":1,"via":"UOB Visa","det":"SGD 72.30 per month","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"car","name":"Car","grp":"inst","type":"fixed","amt":250,"due":1,"via":"MBB","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"hpc","name":"HPC Maint","grp":"inst","type":"fixed","amt":283.4,"due":14,"via":"MBB","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"sprent","name":"SP rental","grp":"inst","type":"fixed","amt":900,"due":1,"via":"","det":"","end":"2026-05","adhoc":false,"card":"","from":"2026-01"},{"id":"tnb709","name":"TNB (709)","grp":"util","type":"var","amt":0,"due":1,"via":"OCBC 360","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"tnbbm","name":"TNB (BM)","grp":"util","type":"var","amt":0,"due":1,"via":"OCBC 360","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"tnbsp","name":"TNB (SP)","grp":"util","type":"var","amt":0,"due":1,"via":"OCBC 360","det":"","end":"2026-06","adhoc":false,"card":"","from":"2026-01"},{"id":"tnb45","name":"TNB (45)","grp":"util","type":"var","amt":0,"due":1,"via":"OCBC 360","det":"","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"astro","name":"Astro (BM)","grp":"util","type":"fixed","amt":30.24,"due":6,"via":"UOB Visa","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"air709","name":"Air Selangor (709)","grp":"util","type":"var","amt":0,"due":9,"via":"TNG","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"air45","name":"Air Selangor (45)","grp":"util","type":"var","amt":0,"due":9,"via":"TNG","det":"Acct 8890920073","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"sada","name":"SADA (SP)","grp":"util","type":"var","amt":0,"due":10,"via":"","det":"","end":"2026-04","adhoc":false,"card":"","from":"2026-01"},{"id":"pba","name":"PBA (BM)","grp":"util","type":"var","amt":0,"due":15,"via":"","det":"","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"digi","name":"Digi","grp":"util","type":"var","amt":0,"due":15,"via":"OCBC 360","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"time709","name":"TIME (709)","grp":"util","type":"fixed","amt":104.95,"due":22,"via":"OCBC 360","det":"","end":"","adhoc":false,"card":"","from":"2026-01"},{"id":"iw709","name":"Indah Water (709)","grp":"util","type":"var","amt":0,"due":20,"via":"OCBC 360","det":"Acct 1129 2574 953","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"iwbm","name":"Indah Water (BM)","grp":"util","type":"var","amt":0,"due":20,"via":"OCBC 360","det":"Acct 1093 6999 449","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"iw45","name":"Indah Water (45)","grp":"util","type":"var","amt":0,"due":20,"via":"OCBC 360","det":"Acct 11252658978","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"misc","name":"MISC","grp":"util","type":"var","amt":0,"due":"","via":"","det":"","end":"","adhoc":true,"card":"","from":"2026-01"},{"id":"c_uob","name":"UOB 1071 card","grp":"card","type":"var","amt":0,"due":28,"via":"MBB","det":"","end":"","adhoc":false,"card":"uob","from":"2026-01"},{"id":"c_ocbc","name":"OCBC 1334 card","grp":"card","type":"var","amt":0,"due":15,"via":"OCBC 360","det":"","end":"","adhoc":false,"card":"ocbc","from":"2026-01"},{"id":"c_hl","name":"HL 9431 card","grp":"card","type":"var","amt":0,"due":1,"via":"MBB","det":"","end":"","adhoc":false,"card":"hl","from":"2026-07"},{"id":"c_mbb6498","name":"MBB 6498 card","grp":"card","type":"var","amt":0,"due":14,"via":"MBB","det":"","end":"","adhoc":false,"card":"mbb2","from":"2026-10"},{"id":"c_mbb5914","name":"MBB 5914 card","grp":"card","type":"var","amt":0,"due":14,"via":"MBB","det":"","end":"2026-08","adhoc":false,"card":"mbb","from":"2026-01"}],"pay":{"loan45|2026-10":{"amt":2681.0,"paid":true},"loan45|2026-11":{"amt":2681.0,"paid":false},"loan45|2026-12":{"amt":2681.0,"paid":false},"ins1|2026-01":{"amt":258.33,"paid":true},"ins1|2026-02":{"amt":258.33,"paid":true},"ins1|2026-03":{"amt":258.33,"paid":true},"ins1|2026-04":{"amt":258.33,"paid":true},"ins1|2026-05":{"amt":258.33,"paid":true},"ins1|2026-06":{"amt":258.33,"paid":true},"ins1|2026-07":{"amt":258.33,"paid":true},"ins1|2026-08":{"amt":258.33,"paid":true},"ins1|2026-09":{"amt":258.33,"paid":true},"ins1|2026-10":{"amt":258.33,"paid":true},"ins1|2026-11":{"amt":258.33,"paid":false},"ins1|2026-12":{"amt":258.33,"paid":false},"ins2|2026-01":{"amt":333.33,"paid":true},"ins2|2026-02":{"amt":333.33,"paid":true},"ins2|2026-03":{"amt":333.33,"paid":true},"ins2|2026-04":{"amt":333.33,"paid":true},"ins2|2026-05":{"amt":333.33,"paid":true},"ins2|2026-06":{"amt":333.33,"paid":true},"ins2|2026-07":{"amt":333.33,"paid":true},"ins2|2026-08":{"amt":333.33,"paid":true},"ins2|2026-09":{"amt":333.33,"paid":true},"ins2|2026-10":{"amt":333.33,"paid":true},"ins2|2026-11":{"amt":333.33,"paid":false},"ins2|2026-12":{"amt":333.33,"paid":false},"sgins|2026-01":{"amt":229.0,"paid":true},"sgins|2026-02":{"amt":229.0,"paid":true},"sgins|2026-03":{"amt":229.0,"paid":true},"sgins|2026-04":{"amt":227.0,"paid":true},"sgins|2026-05":{"amt":231.2,"paid":true},"sgins|2026-06":{"amt":236.36,"paid":true},"sgins|2026-07":{"amt":234.83,"paid":true},"sgins|2026-08":{"amt":234.86,"paid":true},"sgins|2026-09":{"amt":236.91,"paid":true},"car|2026-01":{"amt":250.0,"paid":true},"car|2026-02":{"amt":250.0,"paid":true},"car|2026-03":{"amt":250.0,"paid":true},"car|2026-04":{"amt":250.0,"paid":true},"car|2026-05":{"amt":250.0,"paid":true},"car|2026-06":{"amt":250.0,"paid":true},"car|2026-07":{"amt":250.0,"paid":true},"car|2026-08":{"amt":250.0,"paid":true},"car|2026-09":{"amt":250.0,"paid":true},"car|2026-10":{"amt":250.0,"paid":true},"car|2026-11":{"amt":250.0,"paid":false},"car|2026-12":{"amt":250.0,"paid":false},"hpc|2026-01":{"amt":283.4,"paid":true},"hpc|2026-02":{"amt":283.4,"paid":true},"hpc|2026-03":{"amt":283.4,"paid":true},"hpc|2026-04":{"amt":283.4,"paid":true},"hpc|2026-05":{"amt":283.4,"paid":true},"hpc|2026-06":{"amt":283.4,"paid":true},"hpc|2026-07":{"amt":283.4,"paid":true},"hpc|2026-08":{"amt":283.4,"paid":true},"hpc|2026-09":{"amt":283.4,"paid":true},"hpc|2026-10":{"amt":283.4,"paid":true},"hpc|2026-11":{"amt":283.4,"paid":false},"hpc|2026-12":{"amt":283.4,"paid":false},"sprent|2026-01":{"amt":900.0,"paid":true},"sprent|2026-02":{"amt":900.0,"paid":true},"sprent|2026-03":{"amt":900.0,"paid":true},"sprent|2026-04":{"amt":900.0,"paid":true},"sprent|2026-05":{"amt":900.0,"paid":true},"tnb709|2026-01":{"amt":65.55,"paid":true},"tnb709|2026-02":{"amt":64.05,"paid":true},"tnb709|2026-03":{"amt":83.35,"paid":true},"tnb709|2026-04":{"amt":31.75,"paid":true},"tnb709|2026-05":{"amt":82.1,"paid":true},"tnb709|2026-06":{"amt":79.05,"paid":true},"tnb709|2026-07":{"amt":65.8,"paid":true},"tnb709|2026-08":{"amt":74.75,"paid":true},"tnb709|2026-09":{"amt":60.3,"paid":true},"tnb709|2026-10":{"amt":74.5,"paid":true},"tnb709|2026-11":{"amt":80.2,"paid":false},"tnbbm|2026-01":{"amt":1.0,"paid":true},"tnbbm|2026-02":{"amt":0.0,"paid":true},"tnbbm|2026-03":{"amt":0.0,"paid":true},"tnbbm|2026-04":{"amt":7.0,"paid":true},"tnbbm|2026-05":{"amt":36.55,"paid":true},"tnbbm|2026-06":{"amt":29.35,"paid":true},"tnbbm|2026-07":{"amt":38.25,"paid":true},"tnbbm|2026-08":{"amt":26.25,"paid":true},"tnbbm|2026-09":{"amt":28.35,"paid":true},"tnbbm|2026-10":{"amt":46.85,"paid":true},"tnbsp|2026-01":{"amt":31.85,"paid":true},"tnbsp|2026-02":{"amt":32.25,"paid":true},"tnbsp|2026-03":{"amt":74.75,"paid":true},"tnbsp|2026-04":{"amt":38.1,"paid":true},"tnbsp|2026-05":{"amt":-0.6,"paid":true},"tnbsp|2026-06":{"amt":4.05,"paid":true},"tnb45|2026-10":{"amt":713.0,"paid":true},"astro|2026-01":{"amt":30.24,"paid":true},"astro|2026-02":{"amt":30.24,"paid":true},"astro|2026-03":{"amt":30.24,"paid":true},"astro|2026-04":{"amt":30.24,"paid":true},"astro|2026-05":{"amt":30.24,"paid":true},"astro|2026-06":{"amt":30.24,"paid":true},"astro|2026-07":{"amt":30.24,"paid":true},"astro|2026-08":{"amt":30.24,"paid":true},"astro|2026-09":{"amt":30.24,"paid":true},"astro|2026-10":{"amt":30.24,"paid":true},"astro|2026-11":{"amt":30.24,"paid":false},"astro|2026-12":{"amt":30.24,"paid":false},"air709|2026-01":{"amt":6.5,"paid":true},"air709|2026-02":{"amt":6.5,"paid":true},"air709|2026-03":{"amt":5.85,"paid":true},"air709|2026-04":{"amt":6.5,"paid":true},"air709|2026-05":{"amt":7.15,"paid":true},"air709|2026-06":{"amt":6.5,"paid":true},"air709|2026-07":{"amt":6.5,"paid":true},"air709|2026-08":{"amt":6.5,"paid":true},"air709|2026-09":{"amt":7.15,"paid":true},"air709|2026-10":{"amt":6.5,"paid":true},"air709|2026-11":{"amt":6.5,"paid":false},"air45|2026-10":{"amt":152.1,"paid":true},"sada|2026-01":{"amt":8.1,"paid":true},"sada|2026-02":{"amt":8.1,"paid":true},"sada|2026-03":{"amt":10.53,"paid":true},"sada|2026-04":{"amt":8.12,"paid":true},"pba|2026-03":{"amt":55.7,"paid":true},"pba|2026-06":{"amt":12.4,"paid":true},"pba|2026-08":{"amt":12.4,"paid":true},"pba|2026-10":{"amt":13.0,"paid":true},"digi|2026-01":{"amt":63.6,"paid":true},"digi|2026-02":{"amt":63.6,"paid":true},"digi|2026-03":{"amt":63.6,"paid":true},"digi|2026-04":{"amt":125.08,"paid":true},"digi|2026-05":{"amt":63.6,"paid":true},"digi|2026-06":{"amt":63.6,"paid":true},"digi|2026-07":{"amt":63.6,"paid":true},"digi|2026-08":{"amt":93.28,"paid":true},"digi|2026-09":{"amt":63.6,"paid":true},"digi|2026-10":{"amt":63.6,"paid":true},"digi|2026-11":{"amt":69.32,"paid":false},"time709|2026-01":{"amt":104.95,"paid":true},"time709|2026-02":{"amt":104.95,"paid":true},"time709|2026-03":{"amt":104.95,"paid":true},"time709|2026-04":{"amt":104.95,"paid":true},"time709|2026-05":{"amt":104.9,"paid":true},"time709|2026-06":{"amt":104.95,"paid":true},"time709|2026-07":{"amt":104.95,"paid":true},"time709|2026-08":{"amt":104.95,"paid":true},"time709|2026-09":{"amt":104.95,"paid":true},"time709|2026-10":{"amt":104.95,"paid":true},"iw709|2026-01":{"amt":90.0,"paid":true},"iw709|2026-07":{"amt":90.0,"paid":true},"iwbm|2026-03":{"amt":234.0,"paid":true},"iwbm|2026-07":{"amt":90.0,"paid":true},"iw45|2026-10":{"amt":90.0,"paid":true},"misc|2026-05":{"amt":145.63,"paid":true},"misc|2026-07":{"amt":140.63,"paid":true},"c_uob|2026-01":{"amt":2122.67,"paid":true},"c_uob|2026-02":{"amt":1196.0,"paid":true},"c_uob|2026-03":{"amt":1850.43,"paid":true},"c_uob|2026-04":{"amt":1559.97,"paid":true},"c_uob|2026-05":{"amt":2046.31,"paid":true},"c_uob|2026-06":{"amt":2726.81,"paid":true},"c_uob|2026-07":{"amt":2185.8,"paid":true},"c_uob|2026-08":{"amt":1794.51,"paid":true},"c_uob|2026-09":{"amt":2430.24,"paid":true},"c_uob|2026-10":{"amt":2085.18,"paid":true},"c_ocbc|2026-01":{"amt":1329.89,"paid":true},"c_ocbc|2026-02":{"amt":916.56,"paid":true},"c_ocbc|2026-03":{"amt":1236.81,"paid":true},"c_ocbc|2026-04":{"amt":909.45,"paid":true},"c_ocbc|2026-05":{"amt":1251.35,"paid":true},"c_ocbc|2026-06":{"amt":512.74,"paid":true},"c_ocbc|2026-07":{"amt":952.09,"paid":true},"c_ocbc|2026-08":{"amt":539.57,"paid":true},"c_ocbc|2026-09":{"amt":626.66,"paid":true},"c_ocbc|2026-10":{"amt":890.99,"paid":true},"c_hl|2026-07":{"amt":25.0,"paid":true},"c_hl|2026-08":{"amt":163.1,"paid":true},"c_hl|2026-09":{"amt":47.89,"paid":true},"c_hl|2026-10":{"amt":0.0,"paid":true},"c_mbb6498|2026-10":{"amt":78.02,"paid":true},"c_mbb5914|2026-01":{"amt":159.9,"paid":true},"c_mbb5914|2026-02":{"amt":79.6,"paid":true},"c_mbb5914|2026-03":{"amt":297.35,"paid":true},"c_mbb5914|2026-04":{"amt":201.6,"paid":true},"c_mbb5914|2026-05":{"amt":113.4,"paid":true},"c_mbb5914|2026-06":{"amt":42.03,"paid":true},"c_mbb5914|2026-07":{"amt":49.8,"paid":true},"c_mbb5914|2026-08":{"amt":0.0,"paid":true}},"cards":[{"id":"uob","name":"UOB 1071","budget":1500,"cap":0,"rates":{"Petrol":10,"Dining":10,"Grocery":10,"Others":0.2}},{"id":"ocbc","name":"OCBC 1334","budget":500,"cap":0,"rates":{}},{"id":"hl","name":"HL 9431","budget":0,"cap":0,"rates":{}},{"id":"mbb","name":"MBB 5914","budget":0,"cap":0,"rates":{"Petrol":1,"Dining":1,"Grocery":1,"Others":1}},{"id":"mbb2","name":"MBB 6498","budget":0,"cap":0,"rates":{}},{"id":"mbb3","name":"MBB 0188","budget":0,"cap":0,"rates":{},"off":true},{"id":"rhb","name":"RHB","budget":0,"cap":0,"rates":{},"off":true}]};
 const seed=()=>JSON.parse(JSON.stringify({v:2,cats:['Petrol','Dining','Grocery','Others'],cards:HIST.cards,bills:HIST.bills,pay:HIST.pay,sp:[],stmt:{},plat:PLAT}));
-function migrate(){if(S.v>=2)return false;const old=S.cards||[];
- S.cards=JSON.parse(JSON.stringify(HIST.cards)).map(c=>{const o=old.find(x=>x.id==c.id);return o?{...c,budget:o.budget||c.budget,cap:o.cap||c.cap,rates:o.rates&&Object.keys(o.rates).length?o.rates:c.rates}:c});
- S.bills=JSON.parse(JSON.stringify(HIST.bills));S.pay=JSON.parse(JSON.stringify(HIST.pay));S.plat=S.plat||PLAT;S.v=2;return true}
+function migrate(){let ch=false;
+ if(!(S.v>=2)){const old=S.cards||[];
+  S.cards=JSON.parse(JSON.stringify(HIST.cards)).map(c=>{const o=old.find(x=>x.id==c.id);return o?{...c,budget:o.budget||c.budget,cap:o.cap||c.cap,rates:o.rates&&Object.keys(o.rates).length?o.rates:c.rates}:c});
+  S.bills=JSON.parse(JSON.stringify(HIST.bills));S.pay=JSON.parse(JSON.stringify(HIST.pay));S.plat=S.plat||PLAT;S.v=2;ch=true}
+ if(S.v<3){S.cards.forEach(c=>{if(!c.rules){const r=c.rates||{};c.rules=Object.keys(r).filter(k=>k!='Others').map(k=>({cat:k,rate:+r[k]||0,cap:0}));c.base=+r.Others||0;delete c.rates}
+   if(c.off){c.end=c.end||(c.id=='rhb'?'2026-05':'2026-08');delete c.off}});
+  S.bills.forEach(b=>{if(['ins1','ins2','sgins'].includes(b.id)&&b.auto===undefined)b.auto=true});S.v=3;ch=true}
+ if(!S.per)S.per={};return ch}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 let sb=null,user=null,tmr,dirty=false,syncMsg='';
 const setSync=m=>{syncMsg=m;const e=$('#sy');if(e)e.textContent=m};
@@ -89,110 +100,146 @@ async function logout(){await sb.auth.signOut();user=null;render()}
 /* ---------- bills ---------- */
 const rec=(b,k)=>S.pay[b.id+'|'+k]||{};
 const GRP={inst:'Installments',util:'Utilities',card:'Card payments'};
-const grpOf=b=>b.card?'card':(b.grp||(b.type=='fixed'?'inst':'util'));
+const grpOf=b=>b.card||b.grp=='card'?'card':(b.grp||(b.type=='fixed'?'inst':'util'));
+const ICON={inst:'🏦',util:'💡',card:'💳'};
+const cardOn=(c,k)=>(!c.from||k>=c.from)&&(!c.end||k<=c.end);
+const ymNow=()=>now.getFullYear()+'-'+pad(now.getMonth()+1);
 const active=(b,k)=>k>=(b.from||'0')&&(!b.end||k<=b.end)&&(!b.adhoc||!!S.pay[b.id+'|'+k]);
 const platSel=(id,v)=>{const l=S.plat.slice();if(v&&!l.includes(v))l.push(v);return`<select id=${id}><option value="">—</option>${l.map(p=>`<option ${p==v?'selected':''}>${esc(p)}</option>`).join('')}</select>`};
 function amtOf(b,k){const r=rec(b,k);if(r.amt!=null&&r.amt!=='')return+r.amt;
  if(b.card){const s=S.stmt[b.card+'|'+k];if(s!=null&&s!=='')return+s}return b.type==='fixed'?+b.amt||0:0}
-function status(b,k){if(rec(b,k).paid)return'paid';const[y,m]=k.split('-');return new Date()>new Date(y,m-1,b.due||1,23,59)?'late':'due'}
+const duePast=(b,k)=>{const[y,m]=k.split('-');return new Date()>new Date(y,m-1,b.due||1,23,59)};
+function status(b,k){const r=rec(b,k);if(r.paid)return'paid';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
 const nav=yr=>`<div class=nav><button onclick="navM(-1)">‹</button><b>${V.yr&&V.tab=='bills'?V.y:MN[V.m]+' '+V.y}</b><button onclick="navM(1)">›</button>${yr?`<button class=sm onclick="V.yr=!V.yr;render()">${V.yr?'Month':'Year'}</button>`:''}</div>`;
 function navM(d){if(V.yr&&V.tab=='bills')V.y+=d;else{V.m+=d;if(V.m<0){V.m=11;V.y--}if(V.m>11){V.m=0;V.y++}}render()}
-function row(b,k){const r=rec(b,k),a=amtOf(b,k),s=status(b,k);
- return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${b.due||'-'}</div><div class=mid><b>${esc(b.name)}</b><small>${esc(r.via||b.via||'')}${r.paid&&r.date?' · paid '+r.date.slice(8)+'/'+r.date.slice(5,7):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${s=='paid'?'Paid':s=='late'?'Overdue':'Not yet'}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
-function billsView(){const k=ym(),L=S.bills.filter(b=>active(b,k));let t=0,p=0;
- L.forEach(b=>{const a=amtOf(b,k);t+=a;if(rec(b,k).paid)p+=a});
- const grp=q=>{const l=L.filter(b=>grpOf(b)==q);if(!l.length)return'';let T=0,P=0;l.forEach(b=>{const a=amtOf(b,k);T+=a;if(rec(b,k).paid)P+=a});
-  return`<h3><span>${GRP[q]}</span><span>${rm(T)} · left ${rm(T-P)}</span></h3>`+l.map(b=>row(b,k)).join('')};
- const hid=S.bills.filter(b=>b.adhoc&&k>=b.from&&(!b.end||k<=b.end)&&!S.pay[b.id+'|'+k]);
- return nav(1)+`<div class=sum><div><small>Total</small><b>${rm(t)}</b></div><div><small>Paid</small><b class=ok>${rm(p)}</b></div><div><small>Left</small><b class=bad>${rm(t-p)}</b></div></div>`
- +grp('inst')+grp('util')+grp('card')+(hid.length?`<h3><span>Ad-hoc bills · tap to add this month</span></h3><div class=chips style="flex-wrap:wrap">${hid.map(b=>`<button onclick="payEd('${b.id}','${k}')">+ ${esc(b.name)}</button>`).join('')}</div>`:'')+`<button class=add onclick="editBill()">+ Add bill</button>`}
+function sumG(L,k){let T=0,P=0;L.forEach(b=>{const a=amtOf(b,k);T+=a;if(status(b,k)=='paid')P+=a});return{T,P,O:T-P}}
+function row(b,k){const r=rec(b,k),a=amtOf(b,k),s=status(b,k),lab=s=='paid'?(b.auto&&!r.paid?'Auto-paid':'Paid'):s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
+ return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${b.due||'-'}</div><div class=mid><b>${esc(b.name)}</b><small>${b.auto?'⟳ auto · ':''}${esc(r.via||b.via||'')}${r.paid&&r.date?' · paid '+r.date.slice(8)+'/'+r.date.slice(5,7):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${lab}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
+const sum3=s=>`<div class=sum><div><small>Total</small><b>${rm(s.T)}</b></div><div><small>Paid</small><b class=ok>${rm(s.P)}</b></div><div><small>Outstanding</small><b class=bad>${rm(s.O)}</b></div></div>`;
+function billsView(){const k=ym(),L=S.bills.filter(b=>active(b,k));
+ if(V.g){const q=V.g,l=L.filter(b=>grpOf(b)==q),hid=S.bills.filter(b=>grpOf(b)==q&&b.adhoc&&k>=b.from&&(!b.end||k<=b.end)&&!S.pay[b.id+'|'+k]);
+  return nav(1)+`<div class=nav style="padding-top:0"><button class=sm onclick="V.g=null;render()">‹ All</button><b>${ICON[q]} ${GRP[q]}</b></div>`+sum3(sumG(l,k))+'<div style="height:10px"></div>'+l.map(b=>row(b,k)).join('')
+  +(hid.length?`<h3><span>Ad-hoc · tap to add this month</span></h3><div class=chips style="flex-wrap:wrap">${hid.map(b=>`<button onclick="payEd('${b.id}','${k}')">+ ${esc(b.name)}</button>`).join('')}</div>`:'')+`<button class=add onclick="editBill(null,'${q}')">+ Add to ${GRP[q]}</button>`}
+ const A=sumG(L,k);
+ return nav(1)+`<div class=gt><small>Grand total · ${MN[V.m]}</small><b>${rm(A.T)}</b><div class=fr><span class=ok>Paid ${rm(A.P)}</span><span class=bad>Outstanding ${rm(A.O)}</span></div></div>`
+ +['inst','util','card'].map(q=>{const l=L.filter(b=>grpOf(b)==q),s=sumG(l,k),n=l.filter(b=>status(b,k)=='paid').length;
+  return`<div class=fold onclick="V.g='${q}';render()"><div class=fi>${ICON[q]}</div><div class=fm><b>${GRP[q]}</b><small>${n} of ${l.length} paid</small><div class=fr><span>Total ${rm(s.T)}</span></div><div class=fr><span class=ok>Paid ${rm(s.P)}</span><span class=bad>Outstanding ${rm(s.O)}</span></div></div><div class=ar>›</div></div>`}).join('')
+ +`<button class=add onclick="editBill()">+ Add bill</button>`}
 function yearView(){const ks=MN.map((_,i)=>ym(V.y,i));let h=nav(1)+'<div class=scroll><table class=yr><tr><th></th>'+MN.map(m=>`<th>${m}</th>`).join('')+'<th>Year</th></tr>',GT=ks.map(()=>0);
  ['inst','util','card'].forEach(q=>{const l=S.bills.filter(b=>grpOf(b)==q&&ks.some(k=>active(b,k)));if(!l.length)return;const T=ks.map(()=>0);
   h+=`<tr><td class="nm gh" colspan=14>${GRP[q]}</td></tr>`;
   l.forEach(b=>{let y=0;h+=`<tr><td class=nm>${esc(b.name)}</td>`+ks.map((k,i)=>{if(!active(b,k))return'<td></td>';const a=amtOf(b,k);T[i]+=a;y+=a;return`<td class="c ${status(b,k)}" onclick="V.m=${i};V.yr=false;render()">${a?Math.round(a):'·'}</td>`}).join('')+`<td class=t>${Math.round(y)}</td></tr>`});
   h+=`<tr class=tr><td class=nm>Total</td>`+T.map(x=>`<td>${x?Math.round(x):''}</td>`).join('')+`<td>${Math.round(T.reduce((a,b)=>a+b,0))}</td></tr>`;T.forEach((x,i)=>GT[i]+=x)});
  return h+`<tr class=tr><td class=nm>ALL</td>`+GT.map(x=>`<td>${x?Math.round(x):''}</td>`).join('')+`<td>${Math.round(GT.reduce((a,b)=>a+b,0))}</td></tr></table></div><p class=mut>Amounts in RM. <span class=ok>Green</span> paid · <span style="color:var(--wn)">orange</span> not yet · <span class=bad>red</span> overdue. Tap an amount to open that month.</p>`}
-function quick(id,k){const r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};r.paid=!r.paid;if(r.paid)r.date=r.date||today();else delete r.date;save();render()}
+function quick(id,k){const b=S.bills.find(x=>x.id==id),cur=status(b,k)=='paid',r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};r.paid=!cur;if(r.paid)r.date=r.date||today();else delete r.date;save();render()}
 function payEd(id,k){const b=S.bills.find(x=>x.id===id),r=rec(b,k);
  sheet(`<h2>${esc(b.name)} · ${MN[+k.slice(5)-1]}</h2>${b.det?`<p class=mut>📝 ${esc(b.det)}</p>`:''}
  <label>Amount (RM)<input id=a type=number step=0.01 inputmode=decimal value="${r.amt??''}" placeholder="${amtOf(b,k)||''}"></label>
  <label>Paid via / platform${platSel('v',r.via??b.via??'')}</label>
  <label>Paid on<input id=dt type=date value="${r.date||''}"></label>
  <label>Remark<textarea id=n rows=2>${esc(r.note||'')}</textarea></label>
- <label class=chk><input id=p type=checkbox ${r.paid?'checked':''}> Paid</label>
+ <label class=chk><input id=p type=checkbox ${status(b,k)=='paid'?'checked':''}> Paid${b.auto?' (auto-pay bills count as paid after the due date)':''}</label>
  <div class=btns><button onclick="closeSheet()">Cancel</button><button onclick="editBill('${b.id}')">Edit bill</button><button class=pri onclick="savePay('${id}','${k}')">Save</button></div>`)}
-function savePay(id,k){const paid=$('#p').checked;let dt=g('dt');if(paid&&!dt)dt=today();
+function savePay(id,k){const b=S.bills.find(x=>x.id===id);let paid=$('#p').checked;if(b.auto&&paid===duePast(b,k))paid=undefined;let dt=g('dt');if(paid&&!dt)dt=today();
  S.pay[id+'|'+k]={amt:g('a')===''?null:+g('a'),via:g('v'),date:dt,note:g('n'),paid};save();closeSheet();render()}
-function editBill(id){const b=S.bills.find(x=>x.id===id)||{type:'fixed',grp:'util',amt:'',due:'',via:'',det:'',end:'',card:'',from:ym()};
+function editBill(id,gq){const b=S.bills.find(x=>x.id===id)||{type:'fixed',grp:gq||'util',amt:'',due:'',via:'',det:'',end:'',card:'',from:ym()};
  sheet(`<h2>${id?'Edit':'New'} bill</h2><label>Name<input id=bn value="${esc(b.name||'')}"></label>
  <label>Type<select id=bt><option value=fixed ${b.type=='fixed'?'selected':''}>Fixed amount</option><option value=var ${b.type!='fixed'?'selected':''}>Varies monthly</option></select></label>
- <label>Group<select id=bg>${Object.entries(GRP).filter(e=>e[0]!='card').map(e=>`<option value=${e[0]} ${grpOf(b)==e[0]?'selected':''}>${e[1]}</option>`).join('')}</select></label>
+ <label>Group<select id=bg>${Object.entries(GRP).map(e=>`<option value=${e[0]} ${grpOf(b)==e[0]?'selected':''}>${e[1]}</option>`).join('')}</select></label>
  <label class=chk><input id=bh type=checkbox ${b.adhoc?'checked':''}> Ad-hoc (only some months)</label>
+ <label class=chk><input id=bauto type=checkbox ${b.auto?'checked':''}> Auto-pay (GIRO / auto-debit) - counts as paid on the due date</label>
  <label>Usual amount (RM)<input id=ba type=number step=0.01 inputmode=decimal value="${b.amt}"></label>
  <label>Due day of month<input id=bd type=number min=1 max=31 value="${b.due}"></label>
- <label>Default pay via${platSel('bv',b.via)}</label>
+ <label>Default pay via / auto-debit from${platSel('bv',b.via)}</label>
  <label>Details (account no., location…)<textarea id=bx rows=2>${esc(b.det)}</textarea></label>
  <label>Starts from<input id=bf type=month value="${b.from||''}"></label>
  <label>Ends after (optional)<input id=be type=month value="${b.end||''}"></label>
  <label>Linked card (amount follows statement)<select id=bc><option value="">None</option>${S.cards.map(c=>`<option value=${c.id} ${b.card==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
  <div class=btns>${id?`<button class=bad onclick="delBill('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveBill('${id||''}')">Save</button></div>`)}
-function saveBill(id){const o={name:g('bn')||'Bill',grp:g('bg'),adhoc:$('#bh').checked,type:g('bt'),amt:+g('ba')||0,due:+g('bd')||'',via:g('bv'),det:g('bx'),from:g('bf'),end:g('be'),card:g('bc')};
+function saveBill(id){const o={name:g('bn')||'Bill',grp:g('bg'),adhoc:$('#bh').checked,auto:$('#bauto').checked,type:g('bt'),amt:+g('ba')||0,due:+g('bd')||'',via:g('bv'),det:g('bx'),from:g('bf'),end:g('be'),card:g('bc')};
  if(id)Object.assign(S.bills.find(x=>x.id===id),o);else S.bills.push({id:uid(),...o});save();closeSheet();render()}
 function delBill(id){if(confirm('Delete this bill and its payment history?')){S.bills=S.bills.filter(x=>x.id!==id);save();closeSheet();render()}}
 
 /* ---------- card spend ---------- */
 const cname=id=>(S.cards.find(c=>c.id===id)||{name:'?'}).name;
-function cardStats(c,k){let sp=0,rb=0;const by={};
- S.sp.filter(x=>x.card===c.id&&x.date.startsWith(k)).forEach(x=>{sp+=x.amt;rb+=(+c.rates[x.cat]||0)*x.amt/100;by[x.cat]=(by[x.cat]||0)+x.amt});
+function calc(c,l){let sp=0;const by={},rbc={},R=c.rules||[];
+ l.forEach(x=>{sp+=x.amt;by[x.cat]=(by[x.cat]||0)+x.amt;const r=R.find(r=>r.cat==x.cat);rbc[x.cat]=(rbc[x.cat]||0)+x.amt*(r?+r.rate||0:+c.base||0)/100});
+ let rb=0;for(const k in rbc){const r=R.find(r=>r.cat==k);rb+=r&&+r.cap?Math.min(rbc[k],+r.cap):rbc[k]}
  if(+c.cap)rb=Math.min(rb,+c.cap);return{sp,rb,by}}
-function spendView(){const k=ym(),cs=S.cards.filter(c=>!c.off||S.sp.some(x=>x.card===c.id&&x.date.startsWith(k)));
- const L=S.sp.filter(x=>x.date.startsWith(k)&&(V.sc=='all'||x.card==V.sc)),tot=L.reduce((s,x)=>s+x.amt,0);
+const cardStats=(c,k)=>calc(c,S.sp.filter(x=>x.card===c.id&&x.date.startsWith(k)));
+const sumA=l=>l.reduce((s,x)=>s+x.amt,0);
+const ckList=(cid,k)=>{const p=(S.per||{})[cid+'|'+k]||{};return S.sp.filter(x=>x.card==cid&&(p.a&&p.b?x.date>=p.a&&x.date<=p.b:x.date.startsWith(k))).sort((a,b)=>a.date.localeCompare(b.date))};
+const spRow=x=>`<div class=row onclick="editSp('${x.id}')" style="border-left-color:var(--pri)"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked)"><div class=mid><b>${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`;
+function tick(id,v,cid,k){const x=S.sp.find(s=>s.id===id);x.chk=v;save();if(cid)ckSum(cid,k);else if(!$('#sh'))render()}
+function spendView(){const k=ym(),cs=S.cards.filter(c=>cardOn(c,k)||S.sp.some(x=>x.card===c.id&&x.date.startsWith(k)));
+ const L=S.sp.filter(x=>x.date.startsWith(k)&&(V.sc=='all'||x.card==V.sc)),tot=sumA(L);
  let h=nav(0)+`<div class=chips><button class="${V.sc=='all'?'on':''}" onclick="V.sc='all';render()">All cards</button>`+cs.map(c=>`<button class="${V.sc==c.id?'on':''}" onclick="V.sc='${c.id}';render()">${esc(c.name)}</button>`).join('')+'</div>'
  +`<div class=chips><button class="${V.sv!='list'?'on':''}" onclick="V.sv='cal';render()">📅 Calendar</button><button class="${V.sv=='list'?'on':''}" onclick="V.sv='list';render()">☰ List</button></div>`;
  if(V.sv=='list'){const ds=[...new Set(L.map(x=>x.date))].sort().reverse();
-  h+=ds.length?ds.map(d=>{const l=L.filter(x=>x.date==d);return`<h3><span>${+d.slice(8)} ${MN[V.m]}</span><span>${rm(l.reduce((s,x)=>s+x.amt,0))}</span></h3>`+l.map(x=>`<div class=row onclick="editSp('${x.id}')" style="border-left-color:var(--pri)"><div class=mid><b>${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`).join('')}).join(''):'<p class=mut style="text-align:center">No spending recorded this month</p>'}
+  h+=ds.length?ds.map(d=>{const l=L.filter(x=>x.date==d);return`<h3><span>${+d.slice(8)} ${MN[V.m]}</span><span>${rm(sumA(l))}</span></h3>`+l.map(spRow).join('')}).join(''):'<p class=mut style="text-align:center">No spending recorded this month</p>'}
  else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},ct={};
   L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;ct[d]=(ct[d]||0)+1});
   h+='<div class=cal>'+'MTWTFSS'.split('').map(d=>`<b class=wk>${d}</b>`).join('')+'<i></i>'.repeat(first);
   for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?'has':''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${Math.round(dt[d])}</small><em>${ct[d]}×</em>`:''}</button>`;
   h+='</div><p class=mut style="text-align:center">Tap a date to see its transactions</p>'}
- h+=`<h3><span>Month total</span><span>${rm(tot)}</span></h3>`+cs.map(c=>{const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget||0,df=st!=null&&st!==''?st-t.sp:null;
+ return h+`<h3><span>Month total</span><span>${rm(tot)}</span></h3>`+cs.map(c=>{const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget||0,p=S.per[c.id+'|'+k]||{},cl=ckList(c.id,k),ck=cl.filter(x=>x.chk),tt=sumA(ck),df=st!=null&&st!==''?st-tt:null,hasR=(c.rules||[]).some(r=>+r.rate)||+c.base;
   return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}
   <small>${Object.entries(t.by).map(([a,v])=>a+' '+v.toFixed(0)).join(' · ')||'No spend yet'}</small>
-  <div class=rb>Rebate <b class=ok>${rm(t.rb)}</b>${+c.cap&&t.rb>=c.cap?' (capped)':''}</div>
-  <div class=stm>Statement <input type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${c.id}','${k}',this.value)">${df==null?'':Math.abs(df)<0.005?'<span class=ok>✓ matches</span>':`<span class=bad>${df>0?'+':''}${df.toFixed(2)} unrecorded</span>`}</div></div>`}).join('');
- return h+'<button class=fab onclick="editSp()">+</button>'}
+  <div class=rb>${hasR?`Rebate <b class=ok>${rm(t.rb)}</b>${+c.cap&&t.rb>=c.cap?' (capped)':''}`:'<span class=mut>No rebate on this card</span>'}</div>
+  <div class=stm>Statement <input type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${c.id}','${k}',this.value)"><button class=sm onclick="checkEd('${c.id}','${k}')">Cross-check ›</button></div>
+  <small class=mut>${p.a&&p.b?'Period '+p.a.slice(8)+'/'+p.a.slice(5,7)+' – '+p.b.slice(8)+'/'+p.b.slice(5,7)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small></div>`}).join('')+'<button class=fab onclick="editSp()">+</button>'}
 function dayEd(d){const dt=ym()+'-'+pad(d),l=S.sp.filter(x=>x.date==dt);
- sheet(`<h2>${d} ${MN[V.m]} ${V.y}</h2>${l.length?l.map(x=>`<div class=row style="border-left-color:var(--pri)" onclick="editSp('${x.id}')"><div class=mid><b>${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`).join('')+`<p style="text-align:right"><b>Day total ${rm(l.reduce((s,x)=>s+x.amt,0))}</b></p>`:'<p class=mut>No spending on this day</p>'}<div class=btns><button onclick="closeSheet()">Close</button><button class=pri onclick="editSp(null,'${dt}')">+ Add spend</button></div>`)}
-function setStmt(c,k,v){S.stmt[c+'|'+k]=v===''?null:+v;save();render()}
-function editSp(id,dt){const x=S.sp.find(s=>s.id===id)||{date:dt||(ym()==ym(now.getFullYear(),now.getMonth())?today():ym()+'-01'),card:V.sc!='all'?V.sc:(S.cards.find(c=>!c.off)||{}).id,cat:S.cats[0],amt:'',where:''};
+ sheet(`<h2>${d} ${MN[V.m]} ${V.y}</h2>${l.length?l.map(spRow).join('')+`<p style="text-align:right"><b>Day total ${rm(sumA(l))}</b></p>`:'<p class=mut>No spending on this day</p>'}<div class=btns><button onclick="closeSheet();render()">Close</button><button class=pri onclick="editSp(null,'${dt}')">+ Add spend</button></div>`)}
+function checkEd(cid,k){const c=S.cards.find(x=>x.id===cid),p=S.per[cid+'|'+k]||{},st=S.stmt[cid+'|'+k];
+ sheet(`<h2>${esc(c.name)} · ${MN[+k.slice(5)-1]} statement</h2>
+ <div class=two><label>Period from<input id=pa type=date value="${p.a||''}" onchange="setPer('${cid}','${k}')"></label><label>Period to<input id=pb type=date value="${p.b||''}" onchange="setPer('${cid}','${k}')"></label></div>
+ <label>Statement amount (RM)<input id=ps type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${cid}','${k}',this.value,1)"></label>
+ <div id=ckSum class=card style="margin-top:10px"></div><div id=ckL></div>
+ <div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);ckDraw(cid,k)}
+function ckDraw(cid,k){$('#ckL').innerHTML=ckList(cid,k).map(x=>`<div class=row style="border-left-color:var(--pri)" onclick="this.querySelector('input').click()"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked,'${cid}','${k}')"><div class=d>${x.date.slice(8)}/${x.date.slice(5,7)}</div><div class=mid><b>${esc(x.where||x.cat)}</b><small>${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`).join('')||'<p class=mut>No transactions in this period</p>';ckSum(cid,k)}
+function ckSum(cid,k){const c=S.cards.find(x=>x.id===cid),l=ckList(cid,k),t=l.filter(x=>x.chk),T=sumA(l),tt=sumA(t),st=S.stmt[cid+'|'+k],df=st!=null&&st!==''?st-tt:null;
+ $('#ckSum').innerHTML=`Recorded <b>${l.length}</b> items · ${rm(T)}<br>Ticked <b>${t.length}</b> · ${rm(tt)}<br>Not ticked <b>${l.length-t.length}</b> · ${rm(T-tt)}<br>${df==null?'<span class=mut>Enter the statement amount to compare</span>':Math.abs(df)<0.005?'<b class=ok>✓ Ticked total matches the statement</b>':`<b class=bad>Statement − ticked = ${df.toFixed(2)}</b>`}<br>Est. rebate for this period <b class=ok>${rm(calc(c,l).rb)}</b>`}
+function setPer(cid,k){S.per[cid+'|'+k]={a:g('pa'),b:g('pb')};save();ckDraw(cid,k)}
+function setStmt(c,k,v,inSheet){S.stmt[c+'|'+k]=v===''?null:+v;save();inSheet?ckSum(c,k):render()}
+function catOpts(cid,cur){const c=S.cards.find(x=>x.id==cid)||{rules:[]},l=[...(c.rules||[]).map(r=>r.cat),'Others'];if(cur&&!l.includes(cur))l.push(cur);return l.map(a=>`<option ${a==cur?'selected':''}>${esc(a)}</option>`).join('')}
+function editSp(id,dt){const x=S.sp.find(s=>s.id===id)||{date:dt||(ym()==ym(now.getFullYear(),now.getMonth())?today():ym()+'-01'),card:V.sc!='all'?V.sc:(S.cards.find(c=>cardOn(c,ymNow()))||{}).id,cat:'',amt:'',where:''};
  sheet(`<h2>${id?'Edit':'Add'} spend</h2><label>Date<input id=sd type=date value="${x.date}"></label>
- <label>Card<select id=sc>${S.cards.filter(c=>!c.off||c.id==x.card).map(c=>`<option value=${c.id} ${c.id==x.card?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
- <label>Category<select id=st>${S.cats.map(c=>`<option ${c==x.cat?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+ <label>Card<select id=sc onchange="$('#st').innerHTML=catOpts(this.value,'')">${S.cards.filter(c=>cardOn(c,x.date.slice(0,7))||c.id==x.card).map(c=>`<option value=${c.id} ${c.id==x.card?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+ <label>Category<select id=st>${catOpts(x.card,x.cat)}</select></label>
  <label>Amount (RM)<input id=sa type=number step=0.01 inputmode=decimal value="${x.amt}"></label>
  <label>Where / what<input id=sw value="${esc(x.where)}"></label>
+ <label class=chk><input id=sk type=checkbox ${x.chk?'checked':''}> Checked against statement</label>
  <div class=btns>${id?`<button class=bad onclick="delSp('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveSp('${id||''}')">Save</button></div>`)}
-function saveSp(id){const o={date:g('sd'),card:g('sc'),cat:g('st'),amt:+g('sa')||0,where:g('sw')};if(!o.date||!o.amt)return alert('Date and amount needed');
+function saveSp(id){const o={date:g('sd'),card:g('sc'),cat:g('st'),amt:+g('sa')||0,where:g('sw'),chk:$('#sk').checked};if(!o.date||!o.amt)return alert('Date and amount needed');
  if(id)Object.assign(S.sp.find(s=>s.id===id),o);else S.sp.push({id:uid(),...o});save();closeSheet();render()}
 function delSp(id){S.sp=S.sp.filter(s=>s.id!==id);save();closeSheet();render()}
 
 /* ---------- cards & backup ---------- */
-function setView(){return'<h2>Cards</h2>'+S.cards.map(c=>`<div class=row onclick="editCard('${c.id}')" style="border-left-color:var(--pri)"><div class=mid><b>${esc(c.name)}${c.off?' (archived)':''}</b><small>${S.cats.map(a=>a+' '+(c.rates[a]||0)+'%').join(' · ')}</small></div><div class=rt>${c.budget?rm(c.budget):''}</div></div>`).join('')
- +`<button class=add onclick="editCard()">+ Add card</button><h2>Spend categories</h2><input value="${esc(S.cats.join(', '))}" onchange="setCats(this.value)"><p class=mut>Separate with commas. Then set each card's rebate % for any new category.</p>
- <h2>Payment platforms</h2><input value="${esc(S.plat.join(', '))}" onchange="setPlat(this.value)"><p class=mut>These appear in the "Paid via" dropdown.</p><h2>Backup</h2><div class=btns><button onclick="exportJ()">Export backup</button><button onclick="$('#imp').click()">Import</button><button onclick="exportC()">Spend CSV</button></div>
- ${user?`<h2>Account</h2><p class=mut>${esc(user.email)} · <span id=sy>${syncMsg}</span></p><button onclick="logout()">Log out</button>`:''}<input id=imp type=file accept=".json,application/json" hidden onchange="importJ(this)"><p class=mut>Data is stored on this phone only. Export a backup regularly, especially before clearing browser data.</p>`}
+function setView(){const k=ymNow(),act=S.cards.filter(c=>cardOn(c,k)),rem=S.cards.filter(c=>!cardOn(c,k));
+ const rules=c=>{const R=(c.rules||[]).filter(r=>+r.rate||+r.cap).map(r=>r.cat+' '+r.rate+'%'+(+r.cap?' (cap '+r.cap+')':'')),o=+c.base?'others '+c.base+'%':'';const t=[...R,o].filter(Boolean).join(' · ');return(t||'No rebate')+(+c.cap?' · total cap '+c.cap:'')};
+ const cr=c=>`<div class=row onclick="editCard('${c.id}')" style="border-left-color:var(--pri)"><div class=mid><b>${esc(c.name)}</b><small>${esc(rules(c))}</small></div><div class=rt>${c.budget?rm(c.budget):''}</div></div>`;
+ return'<h2>Cards</h2>'+act.map(cr).join('')+`<button class=add onclick="editCard()">+ Add card</button>`+(rem.length?`<h3><span>Removed cards (records kept)</span></h3>`+rem.map(cr).join(''):'')
+ +`<h2>Payment platforms</h2><input value="${esc(S.plat.join(', '))}" onchange="setPlat(this.value)"><p class=mut>These appear in the "Paid via" dropdown.</p>
+ <h2>Backup</h2><div class=btns><button onclick="exportJ()">Export backup</button><button onclick="$('#imp').click()">Import</button><button onclick="exportC()">Spend CSV</button></div>
+ ${user?`<h2>Account</h2><p class=mut>${esc(user.email)} · <span id=sy>${syncMsg}</span></p><button onclick="logout()">Log out</button>`:''}<input id=imp type=file accept=".json,application/json" hidden onchange="importJ(this)"><p class=mut>Data is stored online in your account (and cached on this device). Export a backup now and then.</p>`}
 function setPlat(v){S.plat=[...new Set(v.split(',').map(x=>x.trim()).filter(Boolean))];save();render()}
-function setCats(v){const a=[...new Set(v.split(',').map(s=>s.trim()).filter(Boolean))];if(a.length){S.cats=a;save()}render()}
-function editCard(id){const c=S.cards.find(x=>x.id===id)||{name:'',budget:'',cap:'',rates:{}};
+const ruleRow=r=>`<div class=rl><input placeholder="Category" value="${esc(r.cat)}"><input type=number step=0.01 inputmode=decimal placeholder="%" value="${r.rate}"><input type=number inputmode=decimal placeholder="Cap" value="${r.cap||''}"><button onclick="this.parentNode.remove()">✕</button></div>`;
+function editCard(id){const c=S.cards.find(x=>x.id===id)||{name:'',budget:'',cap:'',rules:[],base:0,from:ymNow(),end:''};
  sheet(`<h2>${id?'Edit':'New'} card</h2><label>Name (e.g. UOB 1071)<input id=cn value="${esc(c.name)}"></label>
- <label>Monthly spend budget (RM)<input id=cb type=number inputmode=decimal value="${c.budget}"></label>
- <label>Monthly rebate cap (RM, 0 = none)<input id=cp type=number inputmode=decimal value="${c.cap}"></label>
- ${S.cats.map((a,i)=>`<label>Rebate % · ${esc(a)}<input id=r${i} type=number step=0.01 inputmode=decimal value="${c.rates[a]??0}"></label>`).join('')}
- <label class=chk><input id=co type=checkbox ${c.off?'checked':''}> Archived (hide from new entries)</label>
- <div class=btns><button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveCard('${id||''}')">Save</button></div>`)}
-function saveCard(id){const rates={};S.cats.forEach((a,i)=>rates[a]=+g('r'+i)||0);
- const o={name:g('cn')||'Card',budget:+g('cb')||0,cap:+g('cp')||0,rates,off:$('#co').checked};
+ <label>Monthly spend budget (RM, optional)<input id=cb type=number inputmode=decimal value="${c.budget||''}"></label>
+ <div class=two><label>Active from<input id=cf type=month value="${c.from||''}"></label><label>Last active month<input id=ce type=month value="${c.end||''}"></label></div>
+ <small class=mut>Leave "last active month" empty while you still use the card. After that month it stops showing, but all its records are kept.</small>
+ <h3><span>Rebate rules</span></h3><small class=mut>Category · rebate % · monthly cap in RM (empty = no cap). Leave everything at 0 for a card with no rebate.</small>
+ <div id=rules>${(c.rules||[]).map(ruleRow).join('')}</div>
+ <button class=add onclick="$('#rules').insertAdjacentHTML('beforeend',ruleRow({cat:'',rate:'',cap:''}))">+ Add category rule</button>
+ <label>All other spending · rebate %<input id=cbase type=number step=0.01 inputmode=decimal value="${c.base||0}"></label>
+ <label>Total monthly rebate cap (RM, empty = no cap)<input id=cp type=number inputmode=decimal value="${c.cap||''}"></label>
+ <div class=btns>${id?`<button class=bad onclick="rmCard('${id}')">Remove card</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveCard('${id||''}')">Save</button></div>`)}
+function saveCard(id){const rules=[...document.querySelectorAll('#rules .rl')].map(d=>{const i=d.querySelectorAll('input');return{cat:i[0].value.trim(),rate:+i[1].value||0,cap:+i[2].value||0}}).filter(r=>r.cat);
+ const o={name:g('cn')||'Card',budget:+g('cb')||0,cap:+g('cp')||0,rules,base:+g('cbase')||0,from:g('cf'),end:g('ce')};
  if(id)Object.assign(S.cards.find(x=>x.id===id),o);else S.cards.push({id:uid(),...o});save();closeSheet();render()}
+function rmCard(id){const c=S.cards.find(x=>x.id===id),k=ymNow();if(!confirm('Remove '+c.name+' from next month? All past records are kept.'))return;
+ c.end=k;S.bills.forEach(b=>{if(b.card==id&&(!b.end||b.end>k))b.end=k});save();closeSheet();render()}
 async function dl(n,t,m){const f=new File([t],n,{type:m});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}catch(e){if(e.name=='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=n;a.click()}
 const exportJ=()=>dl(`mymoney-${today()}.json`,JSON.stringify(S),'application/json');
@@ -200,7 +247,7 @@ const exportC=()=>dl(`spend-${today()}.csv`,'Date,Card,Category,Amount,Where\n'+
 function importJ(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.bills||!d.cards)throw 0;if(confirm('Replace all current data with this backup?')){S=d;save();render()}}catch(e){alert('Not a valid backup file')}};r.readAsText(f)}
 
 /* ---------- shell ---------- */
-function sheet(h){closeSheet();const d=document.createElement('div');d.id='sh';d.innerHTML=`<div class=bk onclick="closeSheet()"></div><div class=pn>${h}</div>`;document.body.appendChild(d)}
+function sheet(h){closeSheet();const d=document.createElement('div');d.id='sh';d.innerHTML=`<div class=bk onclick="closeSheet();render()"></div><div class=pn>${h}</div>`;document.body.appendChild(d)}
 function closeSheet(){const s=$('#sh');if(s)s.remove()}
 function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===V.tab));
  if(sb&&!user){$('#app').innerHTML=loginView();return}
