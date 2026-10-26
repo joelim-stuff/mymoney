@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>My Money</title>
 <style>
-:root{--bg:#f4f6f8;--cd:#fff;--tx:#111827;--mut:#6b7280;--pri:#0f766e;--ok:#16a34a;--wn:#d97706;--bad:#dc2626;--bd:#e5e7eb;color-scheme:light dark}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1115;--cd:#161e24;--tx:#e5e7eb;--mut:#94a3b8;--pri:#2dd4bf;--bd:#26323a;--ok:#4ade80;--wn:#fbbf24;--bad:#f87171}}
+:root{--bg:#f4f6f8;--cd:#fff;--tx:#111827;--mut:#6b7280;--pri:#0f766e;--ok:#16a34a;--wn:#ca8a04;--bl:#2563eb;--or:#ea580c;--bad:#dc2626;--bd:#e5e7eb;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1115;--cd:#161e24;--tx:#e5e7eb;--mut:#94a3b8;--pri:#2dd4bf;--bd:#26323a;--ok:#4ade80;--wn:#facc15;--bl:#60a5fa;--or:#fb923c;--bad:#f87171}}
 *{box-sizing:border-box}
 body{margin:0;font:15px system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);padding:env(safe-area-inset-top) 12px calc(76px + env(safe-area-inset-bottom))}
 #app{max-width:560px;margin:0 auto}
@@ -44,7 +44,7 @@ nav button{flex:1;border:0;border-radius:0;background:none;padding:12px 0;color:
 .pn h2{margin-top:0}.btns{display:flex;gap:8px;margin-top:14px}.btns button{flex:1}
 .yr{font-size:11px}.yr td.c{white-space:nowrap}.c.paid{color:var(--ok)}.c.due{color:var(--wn)}.c.late{color:var(--bad);font-weight:700}.yr .gh{text-align:left;font-weight:700;background:var(--bd);position:static}.yr tr.tr td{font-weight:700;border-top:1px solid var(--mut)}
 h3{display:flex;justify-content:space-between}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.wk{text-align:center;font-size:11px;color:var(--mut)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.wk{text-align:center;font-size:11px;color:var(--mut)}
 .day{aspect-ratio:1;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-radius:8px;font-size:13px;line-height:1.1}.day.has{background:var(--pri);color:#fff;border-color:var(--pri)}.day.tdy{outline:2px solid var(--wn)}.day small{color:inherit;font-size:11px;font-weight:700}.day em{font-size:9px;font-style:normal;opacity:.8}
 .pill.auto{background:#2563eb}.row.auto{border-left-color:#2563eb}.c.auto{color:#2563eb}.dot.auto{background:#2563eb}
 .gt{background:var(--pri);color:#fff;border-radius:14px;padding:14px;margin-bottom:10px}.gt small{color:#fff;opacity:.85;display:block}.gt>b{font-size:24px}
@@ -55,6 +55,11 @@ h3{display:flex;justify-content:space-between}
 .rbr{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}.rbr.tot{border-top:1px solid var(--bd);margin-top:4px;padding-top:5px}
 .gi{display:flex;align-items:center;gap:10px;margin-bottom:8px}.gi span{flex:1;font-size:13px}.gi b{font-size:16px}.gi button{background:#fff3;color:#fff;border-color:#fff5}
 .bal{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #fff5;font-size:13px}.bal b{font-size:17px}.bal.neg b{color:#fecaca}
+.pill.set{background:var(--or)}.row.set{border-left-color:var(--or)}.c.set{color:var(--or)}.dot.set{background:var(--or)}
+.pill.auto{background:var(--bl)}.row.auto{border-left-color:var(--bl)}.c.auto{color:var(--bl)}.dot.auto{background:var(--bl)}
+.cp,.cp b{color:var(--bl);font-weight:600}
+.day.red{background:#dc2626;border-color:#dc2626;color:#fff}.day.grn{background:#16a34a;border-color:#16a34a;color:#fff}.day small{font-size:10px;letter-spacing:-.2px}
+.day{min-width:0;overflow:hidden}.day small{font-size:9.5px;letter-spacing:-.3px;white-space:nowrap}.rbr span:last-child{white-space:nowrap;margin-left:8px}
 </style></head><body>
 <div id="app"></div>
 <nav>
@@ -71,7 +76,9 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const rm=n=>'RM '+(+n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
 const uid=()=>Math.random().toString(36).slice(2,9);
 const now=new Date(),KEY='mymoney_v1';
-const today=()=>`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+const today=()=>{const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const fmtD=d=>d?d.slice(8)+'/'+d.slice(5,7):'';
+const fmt2=n=>n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
 let _c=null,V={tab:'bills',g:null,sv:'cal',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
 const ym=(y=V.y,m=V.m)=>y+'-'+pad(m+1);
 
@@ -86,6 +93,7 @@ function migrate(){let ch=false;
    if(c.off){c.end=c.end||(c.id=='rhb'?'2026-05':'2026-08');delete c.off}});
   S.bills.forEach(b=>{if(['ins1','ins2','sgins'].includes(b.id)&&b.auto===undefined)b.auto=true});S.v=3;ch=true}
  if(S.v<4){S.bills.forEach(b=>{if(b.grp!='card'&&b.card){b.chg=b.card;b.card=''}});S.v=4;ch=true}
+ if(S.v<5){Object.values(S.pay).forEach(r=>{if(r.paid===false)delete r.paid});S.v=5;ch=true}
  if(!S.per)S.per={};if(!S.inc)S.inc={};if(!S.vck)S.vck={};return ch}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 let sb=null,user=null,tmr,dirty=false,syncMsg='';
@@ -113,15 +121,16 @@ const active=(b,k)=>k>=(b.from||'0')&&(!b.end||k<=b.end)&&!paused(b,k)&&(!b.adho
 const platSel=(id,v)=>{const l=S.plat.slice();if(v&&!l.includes(v))l.push(v);return`<select id=${id}><option value="">—</option>${l.map(p=>`<option ${p==v?'selected':''}>${esc(p)}</option>`).join('')}</select>`};
 function amtOf(b,k){const r=rec(b,k);if(r.amt!=null&&r.amt!=='')return+r.amt;
  if(b.card){const s=S.stmt[b.card+'|'+k];if(s!=null&&s!=='')return+s}return b.type==='fixed'?+b.amt||0:0}
-const duePast=(b,k)=>{const[y,m]=k.split('-');return new Date()>new Date(y,m-1,b.due||1,23,59)};
-function status(b,k){const r=rec(b,k);if(r.paid)return'paid';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
+const dueDate=(b,k)=>{const r=rec(b,k);if(r.due){const[y,m,d]=r.due.split('-');return new Date(y,m-1,d,23,59)}const[y,m]=k.split('-');return new Date(y,m-1,Math.min(b.due||1,new Date(y,m,0).getDate()),23,59)};
+const duePast=(b,k)=>new Date()>dueDate(b,k);
+function status(b,k){const r=rec(b,k);if(r.paid)return'paid';if(r.setd)return r.setd<=today()?'paid':'set';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
 const nav=yr=>`<div class=nav><button onclick="navM(-1)">‹</button><b>${V.yr&&V.tab=='bills'?V.y:MN[V.m]+' '+V.y}</b><button onclick="navM(1)">›</button>${yr?`<button class=sm onclick="V.yr=!V.yr;render()">${V.yr?'Month':'Year'}</button>`:''}</div>`;
 function navM(d){if(V.yr&&V.tab=='bills')V.y+=d;else{V.m+=d;if(V.m<0){V.m=11;V.y--}if(V.m>11){V.m=0;V.y++}}render()}
 const pz=(q,k)=>{const l=S.bills.filter(b=>grpOf(b)==q&&paused(b,k)&&k>=(b.from||'0')&&(!b.end||k<=b.end));return l.length?`<p class=mut>⏸ Paused: ${l.map(b=>esc(b.name)+(b.pb?' (until '+b.pb+')':'')).join(', ')}</p>`:''};
 const incOf=k=>(S.inc[k]||[]).reduce((s,x)=>s+(+x.a||0),0);
 function sumG(L,k){let T=0,P=0;L.forEach(b=>{const a=amtOf(b,k);T+=a;if(status(b,k)=='paid')P+=a});return{T,P,O:T-P}}
-function row(b,k){const r=rec(b,k),a=amtOf(b,k),s=status(b,k),lab=s=='paid'?(b.auto&&!r.paid?'Auto-paid':'Paid'):s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
- return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${b.due||'-'}</div><div class=mid><b>${esc(b.name)}</b><small>${b.auto?'⟳ auto · ':''}${b.chg?'💳 '+esc(cname(b.chg))+' · ':''}${esc(r.via||b.via||'')}${r.paid&&r.date?' · paid '+r.date.slice(8)+'/'+r.date.slice(5,7):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${lab}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
+function row(b,k){const r=rec(b,k),a=amtOf(b,k),s=status(b,k),pr=b.card?S.per[b.card+'|'+k]:null,lab=s=='paid'?(b.auto&&!r.paid&&!r.setd?'Auto-paid':'Paid'):s=='set'?'Set':s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
+ return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${r.due?+r.due.slice(8):(b.due||'-')}</div><div class=mid><b>${esc(b.name)}</b><small>${b.auto?'⟳ auto · ':''}${b.chg?'💳 '+esc(cname(b.chg))+' · ':''}${esc(r.via||b.via||'')}${r.setd?(s=='set'?' · set for ':' · paid ')+fmtD(r.setd):r.paid&&r.date?' · paid '+fmtD(r.date):''}${pr&&pr.a&&pr.b?' · stmt '+fmtD(pr.a)+'–'+fmtD(pr.b):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${lab}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
 const sum3=s=>`<div class=sum><div><small>Total</small><b>${rm(s.T)}</b></div><div><small>Paid</small><b class=ok>${rm(s.P)}</b></div><div><small>Outstanding</small><b class=bad>${rm(s.O)}</b></div></div>`;
 function billsView(){const k=ym(),L=S.bills.filter(b=>active(b,k));
  if(V.g){const q=V.g,l=L.filter(b=>grpOf(b)==q),hid=S.bills.filter(b=>grpOf(b)==q&&b.adhoc&&!paused(b,k)&&k>=b.from&&(!b.end||k<=b.end)&&!S.pay[b.id+'|'+k]);
@@ -144,17 +153,24 @@ function incEd(){const k=ym(),l=S.inc[k]||[];
 function incCopy(){const p=V.m?ym(V.y,V.m-1):ym(V.y-1,11);$('#incs').innerHTML=(S.inc[p]||[]).map(incRow).join('')||incRow({n:'',a:''})}
 function saveInc(){S.inc[ym()]=[...document.querySelectorAll('#incs .rl')].map(d=>{const i=d.querySelectorAll('input');return{n:i[0].value.trim(),a:+i[1].value||0}}).filter(x=>x.a);save();closeSheet();render()}
 function goHome(){V.tab='bills';V.g=null;V.yr=false;V.sc='all';V.y=now.getFullYear();V.m=now.getMonth()}
-function quick(id,k){const b=S.bills.find(x=>x.id==id),cur=status(b,k)=='paid',r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};r.paid=!cur;if(r.paid)r.date=r.date||today();else delete r.date;save();render()}
-function payEd(id,k){const b=S.bills.find(x=>x.id===id),r=rec(b,k);
+function quick(id,k){const b=S.bills.find(x=>x.id==id),cur=status(b,k)=='paid',r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};if(cur){delete r.date;delete r.setd;if(b.auto)r.paid=false;else delete r.paid}else{r.paid=true;r.date=r.date||today();delete r.setd}save();render()}
+function payEd(id,k){const b=S.bills.find(x=>x.id===id),r=rec(b,k),st0=r.setd?'set':status(b,k)=='paid'?'paid':'none',p=(b.card&&S.per[b.card+'|'+k])||{};
  sheet(`<h2>${esc(b.name)} · ${MN[+k.slice(5)-1]}</h2>${b.det?`<p class=mut>📝 ${esc(b.det)}</p>`:''}
  <label>Amount (RM)<input id=a type=number step=0.01 inputmode=decimal value="${r.amt??''}" placeholder="${amtOf(b,k)||''}"></label>
+ <label>Status<select id=ps2><option value=none ${st0=='none'?'selected':''}>Not yet</option><option value=set ${st0=='set'?'selected':''}>Set (scheduled for a date)</option><option value=paid ${st0=='paid'?'selected':''}>Paid</option></select></label>
+ <label>Date (scheduled date for Set · paid date for Paid)<input id=dt type=date value="${r.setd||r.date||''}"></label>
+ <small class=mut>Set turns orange, then becomes Paid automatically on that date.${b.auto?' Auto-pay bills count as paid after the due date.':''}</small>
  <label>Paid via / platform${platSel('v',r.via??b.via??'')}</label>
- <label>Paid on<input id=dt type=date value="${r.date||''}"></label>
+ <label>Due date this month (optional)<input id=pdue type=date value="${r.due||''}"></label><small class=mut>Default: day ${b.due||'-'} of the month</small>
+ ${b.card?`<div class=two><label>Statement period from<input id=pp1 type=date value="${p.a||''}"></label><label>to<input id=pp2 type=date value="${p.b||''}"></label></div>`:''}
  <label>Remark<textarea id=n rows=2>${esc(r.note||'')}</textarea></label>
- <label class=chk><input id=p type=checkbox ${status(b,k)=='paid'?'checked':''}> Paid${b.auto?' (auto-pay bills count as paid after the due date)':''}</label>
  <div class=btns><button onclick="closeSheet()">Cancel</button><button onclick="editBill('${b.id}')">Edit bill</button><button class=pri onclick="savePay('${id}','${k}')">Save</button></div>`)}
-function savePay(id,k){const b=S.bills.find(x=>x.id===id);let paid=$('#p').checked;if(b.auto&&paid===duePast(b,k))paid=undefined;let dt=g('dt');if(paid&&!dt)dt=today();
- S.pay[id+'|'+k]={amt:g('a')===''?null:+g('a'),via:g('v'),date:dt,note:g('n'),paid};save();closeSheet();render()}
+function savePay(id,k){const b=S.bills.find(x=>x.id===id),st=g('ps2');let dt=g('dt'),paid=st=='paid',setd='';
+ if(st=='set'){if(!dt)return alert('Pick the date this payment is set for');setd=dt;paid=undefined}
+ else{if(b.auto&&paid===duePast(b,k))paid=undefined;if(!b.auto&&!paid)paid=undefined;if(st=='paid'&&!dt)dt=today()}
+ S.pay[id+'|'+k]={amt:g('a')===''?null:+g('a'),via:g('v'),date:st=='paid'?dt:'',note:g('n'),paid,setd:setd||undefined,due:g('pdue')||undefined};
+ if(b.card){const a=g('pp1'),c2=g('pp2');if(a||c2)S.per[b.card+'|'+k]={a,b:c2};else delete S.per[b.card+'|'+k]}
+ save();closeSheet();render()}
 function editBill(id,gq){const b=S.bills.find(x=>x.id===id)||{type:'fixed',grp:gq||'util',amt:'',due:'',via:'',det:'',end:'',card:'',chg:'',from:ym()};
  sheet(`<h2>${id?'Edit':'New'} bill</h2><label>Name<input id=bn value="${esc(b.name||'')}"></label>
  <label>Type<select id=bt><option value=fixed ${b.type=='fixed'?'selected':''}>Fixed amount</option><option value=var ${b.type!='fixed'?'selected':''}>Varies monthly</option></select></label>
@@ -178,12 +194,12 @@ function delBill(id){if(confirm('Delete this bill and its payment history?')){S.
 /* ---------- card spend ---------- */
 const cname=id=>(S.cards.find(c=>c.id===id)||{name:'?'}).name;
 function billSp(){const out=[],y1=V.y+1;S.bills.forEach(b=>{if(!b.chg)return;for(let y=+((b.from||'2026').slice(0,4));y<=y1;y++)for(let m=0;m<12;m++){const k=ym(y,m);if(!active(b,k))continue;const a=amtOf(b,k);if(!(a>0))continue;
-  const d=Math.min(+b.due||1,new Date(y,m+1,0).getDate()),id='bill:'+b.id+'|'+k;out.push({id,vb:b.id,vk:k,date:k+'-'+pad(d),card:b.chg,cat:'Bills',amt:a,where:b.name,chk:!!S.vck[id]})}});return out}
+  const d=Math.min(+b.due||1,new Date(y,m+1,0).getDate()),id='bill:'+b.id+'|'+k;out.push({id,vb:b.id,vk:k,date:rec(b,k).due||k+'-'+pad(d),card:b.chg,cat:'Bills',amt:a,where:b.name,chk:!!S.vck[id]})}});return out}
 const allSp=()=>_c||(_c=S.sp.concat(billSp()));
 function calc(c,l){let sp=0;const by={},rbc={},R=c.rules||[];
  l.forEach(x=>{sp+=x.amt;by[x.cat]=(by[x.cat]||0)+x.amt;const r=R.find(r=>r.cat==x.cat);rbc[x.cat]=(rbc[x.cat]||0)+x.amt*(r?+r.rate||0:+c.base||0)/100});
- let rb=0,capped=false;const det=[];for(const k in rbc){const r=R.find(r=>r.cat==k),cap=r&&+r.cap?+r.cap:0,v=cap?Math.min(rbc[k],cap):rbc[k];rb+=v;det.push({cat:k,sp:by[k],rate:r?+r.rate||0:+c.base||0,rb:v,capped:cap&&rbc[k]>cap})}
- if(+c.cap&&rb>+c.cap){rb=+c.cap;capped=true}return{sp,rb,by,det,capped}}
+ let rb=0,capped=false;const det=[];for(const k in rbc){const r=R.find(r=>r.cat==k),cap=r&&+r.cap?+r.cap:0,v=cap?Math.min(rbc[k],cap):rbc[k];rb+=v;det.push({cat:k,sp:by[k],rate:r?+r.rate||0:+c.base||0,rb:v,capped:!!cap&&rbc[k]>=cap-0.005})}
+ if(+c.cap&&rb>=+c.cap-0.005){rb=Math.min(rb,+c.cap);capped=true}return{sp,rb,by,det,capped}}
 const cardStats=(c,k)=>calc(c,allSp().filter(x=>x.card===c.id&&x.date.startsWith(k)));
 const sumA=l=>l.reduce((s,x)=>s+x.amt,0);
 const ckList=(cid,k)=>{const p=(S.per||{})[cid+'|'+k]||{};return allSp().filter(x=>x.card==cid&&(p.a&&p.b?x.date>=p.a&&x.date<=p.b:x.date.startsWith(k))).sort((a,b)=>a.date.localeCompare(b.date))};
@@ -195,15 +211,15 @@ function spendView(){const k=ym(),cs=S.cards.filter(c=>cardOn(c,k)||allSp().some
  +`<div class=chips><button class="${V.sv!='list'?'on':''}" onclick="V.sv='cal';render()">📅 Calendar</button><button class="${V.sv=='list'?'on':''}" onclick="V.sv='list';render()">☰ List</button><button class=sm style="margin-left:auto" onclick="sortEd()">⇅ Order cards</button></div>`;
  if(V.sv=='list'){const ds=[...new Set(L.map(x=>x.date))].sort().reverse();
   h+=ds.length?ds.map(d=>{const l=L.filter(x=>x.date==d);return`<h3><span>${+d.slice(8)} ${MN[V.m]}</span><span>${rm(sumA(l))}</span></h3>`+l.map(spRow).join('')}).join(''):'<p class=mut style="text-align:center">No spending recorded this month</p>'}
- else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},ct={};
-  L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;ct[d]=(ct[d]||0)+1});
+ else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},ct={},un={};
+  L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;ct[d]=(ct[d]||0)+1;if(!x.chk)un[d]=1});
   h+='<div class=cal>'+'MTWTFSS'.split('').map(d=>`<b class=wk>${d}</b>`).join('')+'<i></i>'.repeat(first);
-  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?'has':''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${Math.round(dt[d])}</small>`:''}</button>`;
+  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?(un[d]?'has red':'has grn'):''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${fmt2(dt[d])}</small>`:''}</button>`;
   h+='</div><p class=mut style="text-align:center">Tap a date to see its transactions</p>'}
  return h+`<h3><span>Month total</span><span>${rm(tot)}</span></h3>`+cs.map(c=>{const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget||0,p=S.per[c.id+'|'+k]||{},cl=ckList(c.id,k),ck=cl.filter(x=>x.chk),tt=sumA(ck),df=st!=null&&st!==''?st-tt:null,hasR=(c.rules||[]).some(r=>+r.rate)||+c.base;
   return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}
   ${hasR?'':`<small>${Object.entries(t.by).map(([a,v])=>a+' '+v.toFixed(0)).join(' · ')||'No spend yet'}</small>`}
-  <div class=rb>${hasR?(t.det.map(d=>`<div class=rbr><span>${esc(d.cat)} · RM ${d.sp.toFixed(0)} × ${d.rate}%</span><span>${rm(d.rb)}${d.capped?' (cap)':''}</span></div>`).join('')||'<small>No spend yet</small>')+`<div class="rbr tot"><span>Total rebate${t.capped?' (card cap '+c.cap+')':''}</span><b class=ok>${rm(t.rb)}</b></div>`:'<span class=mut>No rebate on this card</span>'}</div>
+  <div class=rb>${hasR?(t.det.map(d=>`<div class="rbr ${d.capped?'cp':''}"><span>${esc(d.cat)} · RM ${d.sp.toFixed(2)} × ${d.rate}%</span><span>${rm(d.rb)}${d.capped?' · cap reached':''}</span></div>`).join('')||'<small>No spend yet</small>')+`<div class="rbr tot ${t.capped?'cp':''}"><span>Total rebate${t.capped?' · card cap '+c.cap+' reached':''}</span><b class="${t.capped?'cp':'ok'}">${rm(t.rb)}</b></div>`:'<span class=mut>No rebate on this card</span>'}</div>
   <div class=stm>Statement <input type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${c.id}','${k}',this.value)"><button class=sm onclick="checkEd('${c.id}','${k}')">Cross-check ›</button></div>
   <small class=mut>${p.a&&p.b?'Period '+p.a.slice(8)+'/'+p.a.slice(5,7)+' – '+p.b.slice(8)+'/'+p.b.slice(5,7)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small></div>`}).join('')+'<button class=fab onclick="editSp()">+</button>'}
 function sortEd(){sheet(`<h2>Card order</h2><div id=so></div><div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);soDraw()}
