@@ -20,8 +20,8 @@ button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
 input,select,textarea{font:inherit;width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--cd);color:var(--tx)}
 label{display:block;font-size:12px;color:var(--mut);margin:10px 0 0}label input,label select,label textarea{margin-top:4px}
 label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--tx)}label.chk input{width:auto;margin:0}
-.nav{display:flex;align-items:center;gap:8px;padding:12px 0}.nav b{flex:1;text-align:center;font-size:18px}.sm{padding:6px 10px;font-size:13px}
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sum div{background:var(--cd);border-radius:12px;padding:10px;border:1px solid var(--bd)}.sum small{display:block}.sum b{font-size:14px}
+.nav{display:flex;align-items:center;gap:8px;padding:12px 0}.nav b{flex:1;text-align:center;font-size:20px}.nav b.mt{font-size:27px;font-weight:800}.nav>button:not(.sm){font-size:24px;padding:4px 16px}.nav .on{background:var(--pri);color:#fff}.sm{padding:6px 10px;font-size:13px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sum div{background:#93c572;color:#14301a;border-radius:12px;padding:10px}.sum small{color:#14301a;opacity:.8}.sum .ok{color:#14532d}.sum .bad{color:#991b1b}.sum small{display:block}.sum b{font-size:14px}
 .row{display:flex;align-items:center;gap:10px;background:var(--cd);border:1px solid var(--bd);border-left:4px solid var(--wn);border-radius:12px;padding:10px;margin-bottom:6px}
 .row.paid{border-left-color:var(--ok)}.row.late{border-left-color:var(--bad)}
 .d{min-width:28px;text-align:center;font-weight:700;color:var(--mut)}.mid{flex:1;min-width:0}.mid b,.mid small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -47,14 +47,14 @@ h3{display:flex;justify-content:space-between}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.wk{text-align:center;font-size:11px;color:var(--mut)}
 .day{aspect-ratio:1;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-radius:8px;font-size:13px;line-height:1.1}.day.has{background:var(--pri);color:#fff;border-color:var(--pri)}.day.tdy{outline:2px solid var(--wn)}.day small{color:inherit;font-size:11px;font-weight:700}.day em{font-size:9px;font-style:normal;opacity:.8}
 .pill.auto{background:#2563eb}.row.auto{border-left-color:#2563eb}.c.auto{color:#2563eb}.dot.auto{background:#2563eb}
-.gt{background:var(--pri);color:#fff;border-radius:14px;padding:14px;margin-bottom:10px}.gt small{color:#fff;opacity:.85;display:block}.gt>b{font-size:24px}
-.fr{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:3px}.gt .fr span{color:#fff}
+.gt{background:#93c572;color:#14301a;border-radius:14px;padding:14px;margin-bottom:10px}.gt small{color:#14301a;opacity:.8;display:block}.gt>b{font-size:24px}
+.fr{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:3px}.gt .fr span{color:#14301a}
 .fold{display:flex;align-items:center;gap:12px;background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px}.fi{font-size:30px}.fm{flex:1}.fm b{font-size:16px;display:block}.ar{font-size:24px;color:var(--mut)}
 .rl{display:grid;grid-template-columns:1.6fr 1fr 1fr auto;gap:6px;margin-top:6px}.rl input{padding:8px;min-width:0}.rl button{padding:6px 10px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tk{width:22px;height:22px;flex:none;margin:0}
 .rbr{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}.rbr.tot{border-top:1px solid var(--bd);margin-top:4px;padding-top:5px}
-.gi{display:flex;align-items:center;gap:10px;margin-bottom:8px}.gi span{flex:1;font-size:13px}.gi b{font-size:16px}.gi button{background:#fff3;color:#fff;border-color:#fff5}
-.bal{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #fff5;font-size:13px}.bal b{font-size:17px}.bal.neg b{color:#fecaca}
+.gi{display:flex;align-items:center;gap:10px;margin-bottom:8px}.gi span{flex:1;font-size:13px}.gi b{font-size:16px}.gi button{background:#ffffff99;color:#14301a;border-color:#14301a33}
+.bal{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #14301a33;font-size:13px}.bal b{font-size:17px}.bal.neg b{color:#b91c1c}
 .pill.set{background:var(--or)}.row.set{border-left-color:var(--or)}.c.set{color:var(--or)}.dot.set{background:var(--or)}
 .pill.auto{background:var(--bl)}.row.auto{border-left-color:var(--bl)}.c.auto{color:var(--bl)}.dot.auto{background:var(--bl)}
 .cp,.cp b{color:var(--bl);font-weight:600}
@@ -66,6 +66,7 @@ nav button{font-size:13px}.fab2{right:84px;background:var(--bl)}
 .ch text{fill:var(--mut);font-size:9px}.ch text.cur{fill:var(--tx);font-weight:700}.ch .gl{stroke:var(--bd)}.ch .sel{fill:none;stroke:var(--pri);stroke-width:1.5}
 .leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;margin-top:6px}.leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
 .tb{display:grid;grid-template-columns:78px 1fr 78px 34px;gap:6px;align-items:center;font-size:12px;margin:7px 0}.tbar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden}.tbar i{display:block;height:100%}.tb b,.tb small{text-align:right}
+.ch .incl{stroke:var(--tx);stroke-width:2.5}
 </style></head><body>
 <div id="app"></div>
 <nav>
@@ -86,7 +87,7 @@ const now=new Date(),KEY='mymoney_v1';
 const today=()=>{const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
 const fmtD=d=>d?d.slice(8)+'/'+d.slice(5,7):'';
 const fmt2=n=>n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
-let _c=null,V={tab:'bills',g:null,sv:'cal',wc:'all',cs:'page',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
+let _c=null,V={tab:'bills',g:null,sv:'cal',wc:'all',cs:'page',ch:false,bc:'bar',pb:'grp',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
 const ym=(y=V.y,m=V.m)=>y+'-'+pad(m+1);
 
 const PLAT=["MBB", "OCBC 360", "OCBC Master", "UOB Visa", "HL", "RHB", "TNG", "Bank transfer", "Cash"];
@@ -104,6 +105,8 @@ function migrate(){let ch=false;
  if(S.v<6){if(!S.cards.some(c=>c.w))S.cards.push({id:'tng',name:'TnG',w:true,open:0,budget:0,cap:0,rules:[],base:0,from:'2026-01',end:''},{id:'mae',name:'MAE',w:true,open:0,budget:0,cap:0,rules:[],base:0,from:'2026-01',end:''});S.v=6;ch=true}
  if(!S.tu)S.tu=[];if(!S.per)S.per={};if(!S.inc)S.inc={};if(!S.vck)S.vck={};return ch}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+let HI=false;try{HI=localStorage.getItem('mm_hi')=='1'}catch(e){}
+const togHi=()=>{HI=!HI;try{localStorage.setItem('mm_hi',HI?'1':'0')}catch(e){}render()};
 let sb=null,user=null,tmr,dirty=false,syncMsg='';
 const setSync=m=>{syncMsg=m;const e=$('#sy');if(e)e.textContent=m};
 const save=()=>{_c=null;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}push()};
@@ -137,7 +140,7 @@ function amtOf(b,k){if(b.vw)return tuSum(b.vw,k).T;const r=rec(b,k);if(r.amt!=nu
 const dueDate=(b,k)=>{const r=rec(b,k);if(r.due){const[y,m,d]=r.due.split('-');return new Date(y,m-1,d,23,59)}const[y,m]=k.split('-');return new Date(y,m-1,Math.min(b.due||1,new Date(y,m,0).getDate()),23,59)};
 const duePast=(b,k)=>new Date()>dueDate(b,k);
 function status(b,k){if(b.vw){const t=tuSum(b.vw,k);return t.T?(t.P>=t.T?'paid':'set'):'due'}const r=rec(b,k);if(r.paid)return'paid';if(r.setd)return r.setd<=today()?'paid':'set';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
-const nav=yr=>`<div class=nav><button onclick="navM(-1)">‹</button><b>${V.yr&&V.tab=='bills'?V.y:MN[V.m]+' '+V.y}</b><button onclick="navM(1)">›</button>${yr?`<button class=sm onclick="V.yr=!V.yr;render()">${V.yr?'Month':'Year'}</button>`:''}</div>`;
+const nav=yr=>`<div class=nav><button onclick="navM(-1)">‹</button><b class=mt>${V.yr&&V.tab=='bills'?V.y:MN[V.m]+' '+V.y}</b><button onclick="navM(1)">›</button>${yr?`<button class=sm onclick="V.yr=!V.yr;V.ch=false;render()">${V.yr?'Month':'Year'}</button><button class="sm ${V.ch?'on':''}" onclick="V.ch=!V.ch;V.yr=false;V.g=null;render()">📊</button>`:''}</div>`;
 function navM(d){if(V.yr&&V.tab=='bills')V.y+=d;else{V.m+=d;if(V.m<0){V.m=11;V.y--}if(V.m>11){V.m=0;V.y++}}render()}
 const pz=(q,k)=>{const l=S.bills.filter(b=>grpOf(b)==q&&paused(b,k)&&k>=(b.from||'0')&&(!b.end||k<=b.end));return l.length?`<p class=mut>⏸ Paused: ${l.map(b=>esc(b.name)+(b.pb?' (until '+b.pb+')':'')).join(', ')}</p>`:''};
 const incOf=k=>(S.inc[k]||[]).reduce((s,x)=>s+(+x.a||0),0);
@@ -150,12 +153,43 @@ function sumG(L,k){let T=0,P=0;L.forEach(b=>{if(b.vw){const t=tuSum(b.vw,k);T+=t
 function row(b,k){if(b.vw)return wrow(b,k);const r=rec(b,k),a=amtOf(b,k),s=status(b,k),pr=b.card?S.per[b.card+'|'+k]:null,lab=s=='paid'?(b.auto&&!r.paid&&!r.setd?'Auto-paid':'Paid'):s=='set'?'Set':s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
  return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${r.due?+r.due.slice(8):(b.due||'-')}</div><div class=mid><b>${esc(b.name)}</b><small>${b.auto?'⟳ auto · ':''}${b.chg?'💳 '+esc(cname(b.chg))+' · ':''}${esc(r.via||b.via||'')}${r.setd?(s=='set'?' · set for ':' · paid ')+fmtD(r.setd):r.paid&&r.date?' · paid '+fmtD(r.date):''}${pr&&pr.a&&pr.b?' · stmt '+fmtD(pr.a)+'–'+fmtD(pr.b):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${lab}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
 const sum3=s=>`<div class=sum><div><small>Total</small><b>${rm(s.T)}</b></div><div><small>Paid</small><b class=ok>${rm(s.P)}</b></div><div><small>Outstanding</small><b class=bad>${rm(s.O)}</b></div></div>`;
-function billsView(){const k=ym(),L=allB().filter(b=>active(b,k));
+const GCOL={inst:'#0ea5e9',util:'#f59e0b',card:'#8b5cf6',wal:'#ec4899'},PAL=['#0ea5e9','#f59e0b','#8b5cf6','#ec4899','#10b981','#ef4444','#6366f1','#14b8a6','#a3a3a3'];
+function stackSvg(M,cols,inc){const mt=M.map(r=>r.reduce((a,b)=>a+b,0)),mx=Math.max(1,...mt,...(inc||[])),W=340,H=170,L0=34,sl=(W-L0)/12,bw=sl*.62,sc=(H-30)/mx;
+ let svg=`<svg class=ch viewBox="0 0 ${W} ${H}" width="100%">`;
+ [0,.5,1].forEach(f=>{const y=H-20-(H-30)*f;svg+=`<line x1="${L0}" x2="${W}" y1="${y}" y2="${y}" class=gl /><text x="${L0-4}" y="${y+3}" text-anchor="end">${fmtK(mx*f)}</text>`});
+ M.forEach((r,m)=>{let y=H-20;const x=L0+m*sl+(sl-bw)/2;
+  r.forEach((v,i)=>{if(v<=0)return;const hh=v*sc;y-=hh;svg+=`<rect x="${x}" y="${y}" width="${bw}" height="${hh}" fill="${cols[i]}" />`});
+  if(m==V.m)svg+=`<rect x="${L0+m*sl+1}" y="2" width="${sl-2}" height="${H-22}" class=sel />`;
+  if(inc&&inc[m]>0){const yy=H-20-inc[m]*sc;svg+=`<line x1="${x-2}" x2="${x+bw+2}" y1="${yy}" y2="${yy}" class=incl />`}
+  svg+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" class="${m==V.m?'cur':''}">${MN[m][0]}</text><rect x="${L0+m*sl}" y="0" width="${sl}" height="${H-14}" fill="transparent" onclick="V.m=${m};render()" />`});
+ return svg+'</svg>'}
+function pieSvg(parts){const T=parts.reduce((a,p)=>a+p.v,0);if(!T)return'<p class=mut style="text-align:center">No bills this month</p>';
+ const cx=100,cy=100,r=88;let a0=-Math.PI/2,svg='<svg viewBox="0 0 200 200" width="230" style="display:block;margin:6px auto">';
+ parts.forEach(p=>{const f=p.v/T;if(f<=0)return;if(f>=.9999){svg+=`<circle cx="100" cy="100" r="${r}" fill="${p.c}" />`;return}
+  const a1=a0+f*2*Math.PI,x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+  svg+=`<path d="M${cx} ${cy}L${x0} ${y0}A${r} ${r} 0 ${f>.5?1:0} 1 ${x1} ${y1}Z" fill="${p.c}" stroke="var(--cd)" stroke-width="1.5" />`;
+  if(f>=.06){const am=(a0+a1)/2;svg+=`<text x="${cx+r*.62*Math.cos(am)}" y="${cy+r*.62*Math.sin(am)+4}" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">${Math.round(f*100)}%</text>`}
+  a0=a1});
+ return svg+'</svg>'}
+function chartBills(){const k=ym(),AB=allB(),G=['inst','util','card','wal'],bar=V.bc!='pie';
+ const gsum=(kk,q)=>sumG(AB.filter(b=>grpOf(b)==q&&active(b,kk)),kk).T;
+ let h=nav(1)+`<div class=chips><button class="${bar?'on':''}" onclick="V.bc='bar';render()">📊 Bar</button><button class="${bar?'':'on'}" onclick="V.bc='pie';render()">🥧 Pie %</button></div>`;
+ const rowsHtml=parts=>{const T=parts.reduce((a,p)=>a+p.v,0);return parts.map(p=>`<div class=tb style="grid-template-columns:12px 1fr 86px 46px"><i style="width:10px;height:10px;border-radius:3px;background:${p.c}"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.n)}</span><b>${fmt2(p.v)}</b><small>${T?(p.v/T*100).toFixed(1):'0.0'}%</small></div>`).join('')};
+ const gparts=G.map(q=>({n:GRP[q],v:gsum(k,q),c:GCOL[q]}));
+ if(bar){const M=MN.map((_,i)=>G.map(q=>gsum(ym(V.y,i),q))),inc=HI?null:MN.map((_,i)=>incOf(ym(V.y,i))),tot=sumA(gparts.map(p=>({amt:p.v})));
+  h+=`<div class=card><b>${V.y} bills by month</b><small class=mut> · tap a month</small>${stackSvg(M,G.map(q=>GCOL[q]),inc)}<div class=leg>${G.map(q=>`<span><i style="background:${GCOL[q]}"></i>${GRP[q]}</span>`).join('')}${inc?'<span><i style="background:var(--tx);height:3px;margin-top:3px"></i>Income</span>':''}</div></div>
+  <div class=card><div class=hd><b>${MN[V.m]} ${V.y}</b><b>${rm(tot)}</b></div>${rowsHtml(gparts)}</div>`}
+ else{const item=V.pb=='item';let parts=gparts;
+  if(item){const l=AB.filter(b=>active(b,k)).map(b=>({n:b.name,v:amtOf(b,k)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);parts=l.slice(0,8).map((x,i)=>({...x,c:PAL[i]}));const rest=l.slice(8);if(rest.length)parts.push({n:'Others ('+rest.length+')',v:rest.reduce((a,x)=>a+x.v,0),c:PAL[8]})}
+  h+=`<div class=chips><button class="${!item?'on':''}" onclick="V.pb='grp';render()">By group</button><button class="${item?'on':''}" onclick="V.pb='item';render()">By item</button></div>
+  <div class=card><div class=hd><b>${MN[V.m]} ${V.y}</b><b>${rm(parts.reduce((a,p)=>a+p.v,0))}</b></div>${pieSvg(parts)}${rowsHtml(parts)}</div>`}
+ return h}
+function billsView(){if(V.ch)return chartBills();const k=ym(),L=allB().filter(b=>active(b,k));
  if(V.g){const q=V.g,l=L.filter(b=>grpOf(b)==q),hid=S.bills.filter(b=>grpOf(b)==q&&b.adhoc&&!paused(b,k)&&k>=b.from&&(!b.end||k<=b.end)&&!S.pay[b.id+'|'+k]);
   return nav(1)+`<div class=nav style="padding-top:0"><button class=sm onclick="V.g=null;render()">‹ All</button><b>${ICON[q]} ${GRP[q]}</b></div>`+sum3(sumG(l,k))+'<div style="height:10px"></div>'+l.map(b=>row(b,k)).join('')
   +(hid.length?`<h3><span>Ad-hoc · tap to add this month</span></h3><div class=chips style="flex-wrap:wrap">${hid.map(b=>`<button onclick="payEd('${b.id}','${k}')">+ ${esc(b.name)}</button>`).join('')}</div>`:'')+pz(q,k)+(q=='wal'?`<button class=add onclick="tuEd()">⬆ Top up</button>`:`<button class=add onclick="editBill(null,'${q}')">+ Add to ${GRP[q]}</button>`)}
  const A=sumG(L,k);
- return nav(1)+`<div class=gt><div class=gi><span>Income · ${MN[V.m]}</span><b>${rm(incOf(k))}</b><button class=sm onclick="incEd()">Edit</button></div><small>Total bills</small><b>${rm(A.T)}</b><div class=fr><span>Paid ${rm(A.P)}</span><span>Outstanding ${rm(A.O)}</span></div><div class="bal ${incOf(k)-A.T<0?'neg':''}"><span>Balance (income − bills)</span><b>${rm(incOf(k)-A.T)}</b></div></div>`
+ return nav(1)+`<div class=gt><div class=gi><span>Income · ${MN[V.m]}</span><b>${HI?'RM ••••••':rm(incOf(k))}</b><button class=sm onclick="togHi()">${HI?'👁 Show':'🙈 Hide'}</button><button class=sm onclick="incEd()">Edit</button></div><small>Total bills</small><b>${rm(A.T)}</b><div class=fr><span>Paid ${rm(A.P)}</span><span>Outstanding ${rm(A.O)}</span></div><div class="bal ${incOf(k)-A.T<0?'neg':''}"><span>Balance (income − bills)</span><b>${rm(incOf(k)-A.T)}</b></div></div>`
  +['inst','util','card','wal'].map(q=>{const l=L.filter(b=>grpOf(b)==q),s=sumG(l,k),n=l.filter(b=>status(b,k)=='paid').length;
   return`<div class=fold onclick="V.g='${q}';render()"><div class=fi>${ICON[q]}</div><div class=fm><b>${GRP[q]}</b><small>${n} of ${l.length} paid</small><div class=fr><span>Total ${rm(s.T)}</span></div><div class=fr><span class=ok>Paid ${rm(s.P)}</span><span class=bad>Outstanding ${rm(s.O)}</span></div></div><div class=ar>›</div></div>`}).join('')
  +`<button class=add onclick="editBill()">+ Add bill</button>`}
@@ -165,13 +199,13 @@ function yearView(){const ks=MN.map((_,i)=>ym(V.y,i)),AB=allB();let h=nav(1)+'<d
   l.forEach(b=>{let y=0;h+=`<tr><td class=nm>${esc(b.name)}</td>`+ks.map((k,i)=>{if(!active(b,k))return'<td></td>';const a=amtOf(b,k);T[i]+=a;y+=a;return`<td class="c ${b.vw&&!a?'':status(b,k)}" onclick="V.m=${i};V.yr=false;render()">${a?fmt2(a):'·'}</td>`}).join('')+`<td class=t>${y?fmt2(y):''}</td></tr>`});
   h+=`<tr class=tr><td class=nm>Total</td>`+T.map(x=>`<td>${x?fmt2(x):''}</td>`).join('')+`<td>${fmt2(T.reduce((a,b)=>a+b,0))}</td></tr>`;T.forEach((x,i)=>GT[i]+=x)});
  const IY=ks.reduce((a,k)=>a+incOf(k),0),GY=GT.reduce((a,b)=>a+b,0);
- return h+`<tr class=tr><td class=nm>ALL</td>`+GT.map(x=>`<td>${x?fmt2(x):''}</td>`).join('')+`<td>${fmt2(GY)}</td></tr><tr class=tr><td class=nm>Income</td>${ks.map(k=>`<td>${incOf(k)?fmt2(incOf(k)):''}</td>`).join('')}<td>${fmt2(IY)}</td></tr><tr class=tr><td class=nm>Balance</td>${ks.map((k,i)=>`<td class="${incOf(k)-GT[i]<0?'bad':'ok'}">${incOf(k)||GT[i]?fmt2(incOf(k)-GT[i]):''}</td>`).join('')}<td>${fmt2(IY-GY)}</td></tr></table></div><p class=mut>Amounts in RM. <span class=ok>Green</span> paid · <span style="color:var(--or)">orange</span> set / planned · <span style="color:var(--wn)">yellow</span> not yet · <span class=bad>red</span> overdue · <span style="color:var(--bl)">blue</span> auto. Tap an amount to open that month.</p>`}
+ return h+`<tr class=tr><td class=nm>ALL</td>`+GT.map(x=>`<td>${x?fmt2(x):''}</td>`).join('')+`<td>${fmt2(GY)}</td></tr><tr class=tr><td class=nm>Income</td>${ks.map(k=>`<td>${incOf(k)?(HI?'••':fmt2(incOf(k))):''}</td>`).join('')}<td>${HI?'••':fmt2(IY)}</td></tr><tr class=tr><td class=nm>Balance</td>${ks.map((k,i)=>`<td class="${incOf(k)-GT[i]<0?'bad':'ok'}">${incOf(k)||GT[i]?fmt2(incOf(k)-GT[i]):''}</td>`).join('')}<td>${fmt2(IY-GY)}</td></tr></table></div><p class=mut>Amounts in RM. <span class=ok>Green</span> paid · <span style="color:var(--or)">orange</span> set / planned · <span style="color:var(--wn)">yellow</span> not yet · <span class=bad>red</span> overdue · <span style="color:var(--bl)">blue</span> auto. Tap an amount to open that month.</p>`}
 const incRow=r=>`<div class=rl style="grid-template-columns:1.6fr 1fr auto"><input placeholder="e.g. Salary" value="${esc(r.n)}"><input type=number step=0.01 inputmode=decimal placeholder="RM" value="${r.a}"><button onclick="this.parentNode.remove()">✕</button></div>`;
 function incEd(){const k=ym(),l=S.inc[k]||[];
  sheet(`<h2>Income · ${MN[V.m]} ${V.y}</h2><div id=incs>${(l.length?l:[{n:'Salary',a:''}]).map(incRow).join('')}</div><button class=add onclick="$('#incs').insertAdjacentHTML('beforeend',incRow({n:'',a:''}))">+ Add income</button><button class=add onclick="incCopy()">Copy from previous month</button><p class=mut>Balance = income − total bills (installments, utilities, card payments and e-wallet top-ups).</p><div class=btns><button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveInc()">Save</button></div>`)}
 function incCopy(){const p=V.m?ym(V.y,V.m-1):ym(V.y-1,11);$('#incs').innerHTML=(S.inc[p]||[]).map(incRow).join('')||incRow({n:'',a:''})}
 function saveInc(){S.inc[ym()]=[...document.querySelectorAll('#incs .rl')].map(d=>{const i=d.querySelectorAll('input');return{n:i[0].value.trim(),a:+i[1].value||0}}).filter(x=>x.a);save();closeSheet();render()}
-function goHome(){V.wc='all';V.tab='bills';V.g=null;V.yr=false;V.sc='all';V.y=now.getFullYear();V.m=now.getMonth()}
+function goHome(){V.ch=false;V.wc='all';V.tab='bills';V.g=null;V.yr=false;V.sc='all';V.y=now.getFullYear();V.m=now.getMonth()}
 function quick(id,k){const b=S.bills.find(x=>x.id==id),cur=status(b,k)=='paid',r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};if(cur){delete r.date;delete r.setd;if(b.auto)r.paid=false;else delete r.paid}else{r.paid=true;r.date=r.date||today();delete r.setd}save();render()}
 function payEd(id,k){const b=S.bills.find(x=>x.id===id),r=rec(b,k),st0=r.setd?'set':status(b,k)=='paid'?'paid':'none',p=(b.card&&S.per[b.card+'|'+k])||{};
  sheet(`<h2>${esc(b.name)} · ${MN[+k.slice(5)-1]}</h2>${b.det?`<p class=mut>📝 ${esc(b.det)}</p>`:''}
@@ -222,7 +256,7 @@ function calc(c,l){let sp=0;const by={},rbc={},R=c.rules||[];
 const cardStats=(c,k)=>calc(c,allSp().filter(x=>x.card===c.id&&x.date.startsWith(k)));
 const sumA=l=>l.reduce((s,x)=>s+x.amt,0);
 const ckList=(cid,k)=>{const p=(S.per||{})[cid+'|'+k]||{};return allSp().filter(x=>x.card==cid&&(p.a&&p.b?x.date>=p.a&&x.date<=p.b:x.date.startsWith(k))).sort((a,b)=>a.date.localeCompare(b.date))};
-const spRow=x=>`<div class=row onclick="${x.vb?`payEd('${x.vb}','${x.vk}')`:`editSp('${x.id}')`}" style="border-left-color:var(--pri)"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked)"><div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(catLbl(x))}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`;
+const spRow=x=>`<div class=row onclick="${x.vb?`payEd('${x.vb}','${x.vk}')`:`editSp('${x.id}')`}" style="border-left-color:var(--pri)">${isW(x.card)?'':`<input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked)">`}<div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(catLbl(x))}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`;
 function tick(id,v,cid,k){if(id.startsWith('bill:'))S.vck[id]=v;else S.sp.find(s=>s.id===id).chk=v;save();if(cid)ckSum(cid,k);else if(!$('#sh'))render()}
 const wbal=(c,k)=>(+c.open||0)+sumA(S.tu.filter(t=>t.w==c.id&&t.date<=k+'-31'))-sumA(allSp().filter(x=>x.card==c.id&&x.date<=k+'-31'));
 const tuRow=t=>`<div class=row onclick="tuEd('${t.id}')" style="border-left-color:var(--bl)"><div class=d>⬆</div><div class=mid><b>Top-up · ${esc(cname(t.w))}</b><small>${esc(t.src||'')}${t.note?' · '+esc(t.note):''}</small></div><div class=rt><b class=ok>+${rm(t.amt)}</b></div></div>`;
@@ -244,9 +278,9 @@ function panel(c,k,w){const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget
   mid=`<small>${Object.entries(bt).map(([a,v])=>a+' '+v.toFixed(2)).join(' · ')||'No spend yet'}</small><div class=rb><div class=rbr><span>Top-ups this month</span><b class=ok>+${rm(tk)}</b></div><div class="rbr tot"><span>Balance at end of month</span><b>${rm(wbal(c,k))}</b></div></div>`}
  else mid=`${hasR?'':`<small>${Object.entries(t.by).map(([a,v])=>a+' '+v.toFixed(0)).join(' · ')||'No spend yet'}</small>`}
   <div class=rb>${hasR?(t.det.map(d=>`<div class="rbr ${d.capped?'cp':''}"><span>${esc(d.cat)} · RM ${d.sp.toFixed(2)} × ${d.rate}%</span><span>${rm(d.rb)}${d.capped?' · cap reached':''}</span></div>`).join('')||'<small>No spend yet</small>')+`<div class="rbr tot ${t.capped?'cp':''}"><span>Total rebate${t.capped?' · card cap '+c.cap+' reached':''}</span><b class="${t.capped?'cp':'ok'}">${rm(t.rb)}</b></div>`:'<span class=mut>No rebate on this card</span>'}</div>`;
- return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}${mid}
+ return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}${mid}${w?'':`
   <div class=stm>Statement <input type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${c.id}','${k}',this.value)"><button class=sm onclick="checkEd('${c.id}','${k}')">Cross-check ›</button></div>
-  <small class=mut>${p.a&&p.b?'Period '+fmtD(p.a)+' – '+fmtD(p.b)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small></div>`}
+  <small class=mut>${p.a&&p.b?'Period '+fmtD(p.a)+' – '+fmtD(p.b)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small>`}</div>`}
 function spendView(w){w=!!w;const k=ym(),sk=w?'wc':'sc',cur=V[sk],sv=V.sv=='list'||V.sv=='chart'?V.sv:'cal',AN=w?'wallets':'cards';
  const cs=S.cards.filter(c=>!!c.w==w&&(cardOn(c,k)||allSp().some(x=>x.card===c.id&&x.date.startsWith(k))));
  const pageAll=allSp().filter(x=>isW(x.card)==w),L=pageAll.filter(x=>x.date.startsWith(k)&&(cur=='all'||x.card==cur)),tot=sumA(L);
@@ -259,7 +293,7 @@ function spendView(w){w=!!w;const k=ym(),sk=w?'wc':'sc',cur=V[sk],sv=V.sv=='list
  else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},un={},tu={};
   L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;if(!x.chk)un[d]=1});TU.forEach(t=>{const d=+t.date.slice(8);tu[d]=(tu[d]||0)+t.amt});
   h+='<div class=cal>'+'MTWTFSS'.split('').map(d=>`<b class=wk>${d}</b>`).join('')+'<i></i>'.repeat(first);
-  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?(un[d]?'has red':'has grn'):''} ${tu[d]?'tup':''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${fmt2(dt[d])}</small>`:''}${tu[d]?`<em>⬆${fmt2(tu[d])}</em>`:''}</button>`;
+  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?(w?'has':un[d]?'has red':'has grn'):''} ${tu[d]?'tup':''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${fmt2(dt[d])}</small>`:''}${tu[d]?`<em>⬆${fmt2(tu[d])}</em>`:''}</button>`;
   h+=`</div><p class=mut style="text-align:center">Tap a date to see its transactions${w?' or add a top-up':''}</p>`}
  return h+`<h3><span>Month spend</span><span>${rm(tot)}</span></h3>`+(w?`<h3><span>Top-ups</span><span>${rm(tuTot)}</span></h3>`:'')+cs.map(c=>panel(c,k,w)).join('')+(w?'<button class="fab fab2" onclick="tuEd()">⬆</button>':'')+'<button class=fab onclick="editSp()">+</button>'}
 function sortEd(w){V.so=!!w;sheet(`<h2>${w?'E-wallet':'Card'} order</h2><div id=so></div><div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);soDraw()}
@@ -298,7 +332,7 @@ function editSp(id,dt){const ex=S.sp.find(s=>s.id===id),w=ex?isW(ex.card):V.tab=
  <label>Type<select id=tc>${TC.map(t=>`<option ${t==(x.tc||(ex?tcOf(x):'Others'))?'selected':''}>${t}</option>`).join('')}</select></label>
  <label>Amount (RM)<input id=sa type=number step=0.01 inputmode=decimal value="${x.amt}"></label>
  <label>Where / what<input id=sw value="${esc(x.where)}"></label>
- <label class=chk><input id=sk type=checkbox ${x.chk?'checked':''}> Checked against statement</label>
+ <label class=chk ${w?'style="display:none"':''}><input id=sk type=checkbox ${x.chk?'checked':''}> Checked against statement</label>
  <div class=btns>${id?`<button class=bad onclick="delSp('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveSp('${id||''}')">Save</button></div>`);if(!ex)$('#st').onchange()}
 function saveSp(id){const o={date:g('sd'),card:g('sc'),cat:g('st'),tc:g('tc'),amt:+g('sa')||0,where:g('sw'),chk:$('#sk').checked};if(!o.date||!o.amt)return alert('Date and amount needed');
  if(id)Object.assign(S.sp.find(s=>s.id===id),o);else S.sp.push({id:uid(),...o});save();closeSheet();render()}
