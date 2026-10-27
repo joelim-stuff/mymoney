@@ -60,11 +60,18 @@ h3{display:flex;justify-content:space-between}
 .cp,.cp b{color:var(--bl);font-weight:600}
 .day.red{background:#dc2626;border-color:#dc2626;color:#fff}.day.grn{background:#16a34a;border-color:#16a34a;color:#fff}.day small{font-size:10px;letter-spacing:-.2px}
 .day{min-width:0;overflow:hidden}.day small{font-size:9.5px;letter-spacing:-.3px;white-space:nowrap}.rbr span:last-child{white-space:nowrap;margin-left:8px}
+.yr td{white-space:nowrap}.pill.none{background:var(--mut)}.row.none{border-left-color:var(--bd)}
+nav button{font-size:13px}.fab2{right:84px;background:var(--bl)}
+.day em{font-size:9px;font-style:normal;color:var(--bl);font-weight:700;white-space:nowrap}.day.has em{color:#fff}.day.tup{border-color:var(--bl)}
+.ch text{fill:var(--mut);font-size:9px}.ch text.cur{fill:var(--tx);font-weight:700}.ch .gl{stroke:var(--bd)}.ch .sel{fill:none;stroke:var(--pri);stroke-width:1.5}
+.leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;margin-top:6px}.leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.tb{display:grid;grid-template-columns:78px 1fr 78px 34px;gap:6px;align-items:center;font-size:12px;margin:7px 0}.tbar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden}.tbar i{display:block;height:100%}.tb b,.tb small{text-align:right}
 </style></head><body>
 <div id="app"></div>
 <nav>
 <button data-t="bills" onclick="V.tab='bills';render()">📋 Bills</button>
-<button data-t="spend" onclick="V.tab='spend';render()">💳 Card Spend</button>
+<button data-t="spend" onclick="V.tab='spend';render()">💳 Cards</button>
+<button data-t="wallet" onclick="V.tab='wallet';render()">👛 E-wallet</button>
 <button data-t="set" onclick="V.tab='set';render()">⚙️ Cards &amp; Backup</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -79,7 +86,7 @@ const now=new Date(),KEY='mymoney_v1';
 const today=()=>{const d=new Date();return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
 const fmtD=d=>d?d.slice(8)+'/'+d.slice(5,7):'';
 const fmt2=n=>n.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
-let _c=null,V={tab:'bills',g:null,sv:'cal',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
+let _c=null,V={tab:'bills',g:null,sv:'cal',wc:'all',cs:'page',yr:false,y:now.getFullYear(),m:now.getMonth(),sc:'all'},S;
 const ym=(y=V.y,m=V.m)=>y+'-'+pad(m+1);
 
 const PLAT=["MBB", "OCBC 360", "OCBC Master", "UOB Visa", "HL", "RHB", "TNG", "Bank transfer", "Cash"];
@@ -94,7 +101,8 @@ function migrate(){let ch=false;
   S.bills.forEach(b=>{if(['ins1','ins2','sgins'].includes(b.id)&&b.auto===undefined)b.auto=true});S.v=3;ch=true}
  if(S.v<4){S.bills.forEach(b=>{if(b.grp!='card'&&b.card){b.chg=b.card;b.card=''}});S.v=4;ch=true}
  if(S.v<5){Object.values(S.pay).forEach(r=>{if(r.paid===false)delete r.paid});S.v=5;ch=true}
- if(!S.per)S.per={};if(!S.inc)S.inc={};if(!S.vck)S.vck={};return ch}
+ if(S.v<6){if(!S.cards.some(c=>c.w))S.cards.push({id:'tng',name:'TnG',w:true,open:0,budget:0,cap:0,rules:[],base:0,from:'2026-01',end:''},{id:'mae',name:'MAE',w:true,open:0,budget:0,cap:0,rules:[],base:0,from:'2026-01',end:''});S.v=6;ch=true}
+ if(!S.tu)S.tu=[];if(!S.per)S.per={};if(!S.inc)S.inc={};if(!S.vck)S.vck={};return ch}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 let sb=null,user=null,tmr,dirty=false,syncMsg='';
 const setSync=m=>{syncMsg=m;const e=$('#sy');if(e)e.textContent=m};
@@ -111,48 +119,59 @@ async function logout(){await sb.auth.signOut();user=null;goHome();render()}
 
 /* ---------- bills ---------- */
 const rec=(b,k)=>S.pay[b.id+'|'+k]||{};
-const GRP={inst:'Installments',util:'Utilities',card:'Card payments'};
+const GRP={inst:'Installments',util:'Utilities',card:'Card payments',wal:'E-wallets'};
+const TC=['Food & drink','Shops','Transport','Bills','Others'],TCOL=['#f59e0b','#8b5cf6','#0ea5e9','#10b981','#94a3b8'],TCMAP={Petrol:'Transport',Dining:'Food & drink',Grocery:'Shops',Bills:'Bills'};
+const tcOf=x=>x.tc||TCMAP[x.cat]||'Others';
+const isW=id=>!!(S.cards.find(c=>c.id==id)||{}).w;
+const catLbl=x=>(isW(x.card)?'':x.cat+' · ')+tcOf(x);
+const fmtK=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1)+'k':String(Math.round(n));
 const grpOf=b=>b.grp=='card'?'card':(b.grp||(b.type=='fixed'?'inst':'util'));
-const ICON={inst:'🏦',util:'💡',card:'💳'};
+const ICON={inst:'🏦',util:'💡',card:'💳',wal:'👛'};
 const cardOn=(c,k)=>(!c.from||k>=c.from)&&(!c.end||k<=c.end);
 const ymNow=()=>now.getFullYear()+'-'+pad(now.getMonth()+1);
 const paused=(b,k)=>!!b.pa&&k>=b.pa&&(!b.pb||k<=b.pb);
 const active=(b,k)=>k>=(b.from||'0')&&(!b.end||k<=b.end)&&!paused(b,k)&&(!b.adhoc||!!S.pay[b.id+'|'+k]);
 const platSel=(id,v)=>{const l=S.plat.slice();if(v&&!l.includes(v))l.push(v);return`<select id=${id}><option value="">—</option>${l.map(p=>`<option ${p==v?'selected':''}>${esc(p)}</option>`).join('')}</select>`};
-function amtOf(b,k){const r=rec(b,k);if(r.amt!=null&&r.amt!=='')return+r.amt;
+function amtOf(b,k){if(b.vw)return tuSum(b.vw,k).T;const r=rec(b,k);if(r.amt!=null&&r.amt!=='')return+r.amt;
  if(b.card){const s=S.stmt[b.card+'|'+k];if(s!=null&&s!=='')return+s}return b.type==='fixed'?+b.amt||0:0}
 const dueDate=(b,k)=>{const r=rec(b,k);if(r.due){const[y,m,d]=r.due.split('-');return new Date(y,m-1,d,23,59)}const[y,m]=k.split('-');return new Date(y,m-1,Math.min(b.due||1,new Date(y,m,0).getDate()),23,59)};
 const duePast=(b,k)=>new Date()>dueDate(b,k);
-function status(b,k){const r=rec(b,k);if(r.paid)return'paid';if(r.setd)return r.setd<=today()?'paid':'set';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
+function status(b,k){if(b.vw){const t=tuSum(b.vw,k);return t.T?(t.P>=t.T?'paid':'set'):'due'}const r=rec(b,k);if(r.paid)return'paid';if(r.setd)return r.setd<=today()?'paid':'set';const late=duePast(b,k);if(b.auto&&r.paid!==false)return late?'paid':'auto';return late?'late':'due'}
 const nav=yr=>`<div class=nav><button onclick="navM(-1)">‹</button><b>${V.yr&&V.tab=='bills'?V.y:MN[V.m]+' '+V.y}</b><button onclick="navM(1)">›</button>${yr?`<button class=sm onclick="V.yr=!V.yr;render()">${V.yr?'Month':'Year'}</button>`:''}</div>`;
 function navM(d){if(V.yr&&V.tab=='bills')V.y+=d;else{V.m+=d;if(V.m<0){V.m=11;V.y--}if(V.m>11){V.m=0;V.y++}}render()}
 const pz=(q,k)=>{const l=S.bills.filter(b=>grpOf(b)==q&&paused(b,k)&&k>=(b.from||'0')&&(!b.end||k<=b.end));return l.length?`<p class=mut>⏸ Paused: ${l.map(b=>esc(b.name)+(b.pb?' (until '+b.pb+')':'')).join(', ')}</p>`:''};
 const incOf=k=>(S.inc[k]||[]).reduce((s,x)=>s+(+x.a||0),0);
-function sumG(L,k){let T=0,P=0;L.forEach(b=>{const a=amtOf(b,k);T+=a;if(status(b,k)=='paid')P+=a});return{T,P,O:T-P}}
-function row(b,k){const r=rec(b,k),a=amtOf(b,k),s=status(b,k),pr=b.card?S.per[b.card+'|'+k]:null,lab=s=='paid'?(b.auto&&!r.paid&&!r.setd?'Auto-paid':'Paid'):s=='set'?'Set':s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
+const wbills=()=>S.cards.filter(c=>c.w).map(c=>({id:'w:'+c.id,vw:c.id,name:c.name+' top-up',grp:'wal',from:c.from||'',end:c.end||'',due:''}));
+const allB=()=>S.bills.concat(wbills());
+function tuSum(w,k){let T=0,P=0,n=0;const t0=today();S.tu.forEach(t=>{if(t.w==w&&t.date.startsWith(k)){T+=t.amt;n++;if(t.date<=t0)P+=t.amt}});return{T,P,n}}
+function wrow(b,k){const t=tuSum(b.vw,k),s=t.T?(t.P>=t.T?'paid':'set'):'none';
+ return`<div class="row ${s}" onclick="tuList('${b.vw}','${k}')"><div class=d>👛</div><div class=mid><b>${esc(b.name)}</b><small>auto from top-ups · ${t.n} top-up${t.n==1?'':'s'}</small></div><div class=rt><b>${t.T?rm(t.T):'—'}</b><span class="pill ${s}">${t.T?(s=='paid'?'Topped up':'Planned'):'None'}</span></div></div>`}
+function sumG(L,k){let T=0,P=0;L.forEach(b=>{if(b.vw){const t=tuSum(b.vw,k);T+=t.T;P+=t.P;return}const a=amtOf(b,k);T+=a;if(status(b,k)=='paid')P+=a});return{T,P,O:T-P}}
+function row(b,k){if(b.vw)return wrow(b,k);const r=rec(b,k),a=amtOf(b,k),s=status(b,k),pr=b.card?S.per[b.card+'|'+k]:null,lab=s=='paid'?(b.auto&&!r.paid&&!r.setd?'Auto-paid':'Paid'):s=='set'?'Set':s=='auto'?'Auto':s=='late'?'Overdue':'Not yet';
  return`<div class="row ${s}" onclick="payEd('${b.id}','${k}')"><div class=d>${r.due?+r.due.slice(8):(b.due||'-')}</div><div class=mid><b>${esc(b.name)}</b><small>${b.auto?'⟳ auto · ':''}${b.chg?'💳 '+esc(cname(b.chg))+' · ':''}${esc(r.via||b.via||'')}${r.setd?(s=='set'?' · set for ':' · paid ')+fmtD(r.setd):r.paid&&r.date?' · paid '+fmtD(r.date):''}${pr&&pr.a&&pr.b?' · stmt '+fmtD(pr.a)+'–'+fmtD(pr.b):''}${r.note?' · '+esc(r.note):''}</small></div><div class=rt><b>${a?rm(a):'—'}</b><span class="pill ${s}">${lab}</span></div><button class=ck onclick="event.stopPropagation();quick('${b.id}','${k}')">${s=='paid'?'↺':'✓'}</button></div>`}
 const sum3=s=>`<div class=sum><div><small>Total</small><b>${rm(s.T)}</b></div><div><small>Paid</small><b class=ok>${rm(s.P)}</b></div><div><small>Outstanding</small><b class=bad>${rm(s.O)}</b></div></div>`;
-function billsView(){const k=ym(),L=S.bills.filter(b=>active(b,k));
+function billsView(){const k=ym(),L=allB().filter(b=>active(b,k));
  if(V.g){const q=V.g,l=L.filter(b=>grpOf(b)==q),hid=S.bills.filter(b=>grpOf(b)==q&&b.adhoc&&!paused(b,k)&&k>=b.from&&(!b.end||k<=b.end)&&!S.pay[b.id+'|'+k]);
   return nav(1)+`<div class=nav style="padding-top:0"><button class=sm onclick="V.g=null;render()">‹ All</button><b>${ICON[q]} ${GRP[q]}</b></div>`+sum3(sumG(l,k))+'<div style="height:10px"></div>'+l.map(b=>row(b,k)).join('')
-  +(hid.length?`<h3><span>Ad-hoc · tap to add this month</span></h3><div class=chips style="flex-wrap:wrap">${hid.map(b=>`<button onclick="payEd('${b.id}','${k}')">+ ${esc(b.name)}</button>`).join('')}</div>`:'')+pz(q,k)+`<button class=add onclick="editBill(null,'${q}')">+ Add to ${GRP[q]}</button>`}
+  +(hid.length?`<h3><span>Ad-hoc · tap to add this month</span></h3><div class=chips style="flex-wrap:wrap">${hid.map(b=>`<button onclick="payEd('${b.id}','${k}')">+ ${esc(b.name)}</button>`).join('')}</div>`:'')+pz(q,k)+(q=='wal'?`<button class=add onclick="tuEd()">⬆ Top up</button>`:`<button class=add onclick="editBill(null,'${q}')">+ Add to ${GRP[q]}</button>`)}
  const A=sumG(L,k);
  return nav(1)+`<div class=gt><div class=gi><span>Income · ${MN[V.m]}</span><b>${rm(incOf(k))}</b><button class=sm onclick="incEd()">Edit</button></div><small>Total bills</small><b>${rm(A.T)}</b><div class=fr><span>Paid ${rm(A.P)}</span><span>Outstanding ${rm(A.O)}</span></div><div class="bal ${incOf(k)-A.T<0?'neg':''}"><span>Balance (income − bills)</span><b>${rm(incOf(k)-A.T)}</b></div></div>`
- +['inst','util','card'].map(q=>{const l=L.filter(b=>grpOf(b)==q),s=sumG(l,k),n=l.filter(b=>status(b,k)=='paid').length;
+ +['inst','util','card','wal'].map(q=>{const l=L.filter(b=>grpOf(b)==q),s=sumG(l,k),n=l.filter(b=>status(b,k)=='paid').length;
   return`<div class=fold onclick="V.g='${q}';render()"><div class=fi>${ICON[q]}</div><div class=fm><b>${GRP[q]}</b><small>${n} of ${l.length} paid</small><div class=fr><span>Total ${rm(s.T)}</span></div><div class=fr><span class=ok>Paid ${rm(s.P)}</span><span class=bad>Outstanding ${rm(s.O)}</span></div></div><div class=ar>›</div></div>`}).join('')
  +`<button class=add onclick="editBill()">+ Add bill</button>`}
-function yearView(){const ks=MN.map((_,i)=>ym(V.y,i));let h=nav(1)+'<div class=scroll><table class=yr><tr><th></th>'+MN.map(m=>`<th>${m}</th>`).join('')+'<th>Year</th></tr>',GT=ks.map(()=>0);
- ['inst','util','card'].forEach(q=>{const l=S.bills.filter(b=>grpOf(b)==q&&ks.some(k=>active(b,k)));if(!l.length)return;const T=ks.map(()=>0);
+function yearView(){const ks=MN.map((_,i)=>ym(V.y,i)),AB=allB();let h=nav(1)+'<div class=scroll><table class=yr><tr><th></th>'+MN.map(m=>`<th>${m}</th>`).join('')+'<th>Year</th></tr>',GT=ks.map(()=>0);
+ ['inst','util','card','wal'].forEach(q=>{const l=AB.filter(b=>grpOf(b)==q&&ks.some(k=>active(b,k)));if(!l.length)return;const T=ks.map(()=>0);
   h+=`<tr><td class="nm gh" colspan=14>${GRP[q]}</td></tr>`;
-  l.forEach(b=>{let y=0;h+=`<tr><td class=nm>${esc(b.name)}</td>`+ks.map((k,i)=>{if(!active(b,k))return'<td></td>';const a=amtOf(b,k);T[i]+=a;y+=a;return`<td class="c ${status(b,k)}" onclick="V.m=${i};V.yr=false;render()">${a?Math.round(a):'·'}</td>`}).join('')+`<td class=t>${Math.round(y)}</td></tr>`});
-  h+=`<tr class=tr><td class=nm>Total</td>`+T.map(x=>`<td>${x?Math.round(x):''}</td>`).join('')+`<td>${Math.round(T.reduce((a,b)=>a+b,0))}</td></tr>`;T.forEach((x,i)=>GT[i]+=x)});
- return h+`<tr class=tr><td class=nm>ALL</td>`+GT.map(x=>`<td>${x?Math.round(x):''}</td>`).join('')+`<td>${Math.round(GT.reduce((a,b)=>a+b,0))}</td></tr><tr class=tr><td class=nm>Income</td>${ks.map(k=>`<td>${incOf(k)?Math.round(incOf(k)):''}</td>`).join('')}<td>${Math.round(ks.reduce((s,k)=>s+incOf(k),0))}</td></tr><tr class=tr><td class=nm>Balance</td>${ks.map((k,i)=>`<td class="${incOf(k)-GT[i]<0?'bad':'ok'}">${incOf(k)||GT[i]?Math.round(incOf(k)-GT[i]):''}</td>`).join('')}<td>${Math.round(ks.reduce((s,k)=>s+incOf(k),0)-GT.reduce((a,b)=>a+b,0))}</td></tr></table></div><p class=mut>Amounts in RM. <span class=ok>Green</span> paid · <span style="color:var(--wn)">orange</span> not yet · <span class=bad>red</span> overdue. Tap an amount to open that month.</p>`}
+  l.forEach(b=>{let y=0;h+=`<tr><td class=nm>${esc(b.name)}</td>`+ks.map((k,i)=>{if(!active(b,k))return'<td></td>';const a=amtOf(b,k);T[i]+=a;y+=a;return`<td class="c ${b.vw&&!a?'':status(b,k)}" onclick="V.m=${i};V.yr=false;render()">${a?fmt2(a):'·'}</td>`}).join('')+`<td class=t>${y?fmt2(y):''}</td></tr>`});
+  h+=`<tr class=tr><td class=nm>Total</td>`+T.map(x=>`<td>${x?fmt2(x):''}</td>`).join('')+`<td>${fmt2(T.reduce((a,b)=>a+b,0))}</td></tr>`;T.forEach((x,i)=>GT[i]+=x)});
+ const IY=ks.reduce((a,k)=>a+incOf(k),0),GY=GT.reduce((a,b)=>a+b,0);
+ return h+`<tr class=tr><td class=nm>ALL</td>`+GT.map(x=>`<td>${x?fmt2(x):''}</td>`).join('')+`<td>${fmt2(GY)}</td></tr><tr class=tr><td class=nm>Income</td>${ks.map(k=>`<td>${incOf(k)?fmt2(incOf(k)):''}</td>`).join('')}<td>${fmt2(IY)}</td></tr><tr class=tr><td class=nm>Balance</td>${ks.map((k,i)=>`<td class="${incOf(k)-GT[i]<0?'bad':'ok'}">${incOf(k)||GT[i]?fmt2(incOf(k)-GT[i]):''}</td>`).join('')}<td>${fmt2(IY-GY)}</td></tr></table></div><p class=mut>Amounts in RM. <span class=ok>Green</span> paid · <span style="color:var(--or)">orange</span> set / planned · <span style="color:var(--wn)">yellow</span> not yet · <span class=bad>red</span> overdue · <span style="color:var(--bl)">blue</span> auto. Tap an amount to open that month.</p>`}
 const incRow=r=>`<div class=rl style="grid-template-columns:1.6fr 1fr auto"><input placeholder="e.g. Salary" value="${esc(r.n)}"><input type=number step=0.01 inputmode=decimal placeholder="RM" value="${r.a}"><button onclick="this.parentNode.remove()">✕</button></div>`;
 function incEd(){const k=ym(),l=S.inc[k]||[];
- sheet(`<h2>Income · ${MN[V.m]} ${V.y}</h2><div id=incs>${(l.length?l:[{n:'Salary',a:''}]).map(incRow).join('')}</div><button class=add onclick="$('#incs').insertAdjacentHTML('beforeend',incRow({n:'',a:''}))">+ Add income</button><button class=add onclick="incCopy()">Copy from previous month</button><p class=mut>Balance = income − total bills (installments, utilities and card payments).</p><div class=btns><button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveInc()">Save</button></div>`)}
+ sheet(`<h2>Income · ${MN[V.m]} ${V.y}</h2><div id=incs>${(l.length?l:[{n:'Salary',a:''}]).map(incRow).join('')}</div><button class=add onclick="$('#incs').insertAdjacentHTML('beforeend',incRow({n:'',a:''}))">+ Add income</button><button class=add onclick="incCopy()">Copy from previous month</button><p class=mut>Balance = income − total bills (installments, utilities, card payments and e-wallet top-ups).</p><div class=btns><button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveInc()">Save</button></div>`)}
 function incCopy(){const p=V.m?ym(V.y,V.m-1):ym(V.y-1,11);$('#incs').innerHTML=(S.inc[p]||[]).map(incRow).join('')||incRow({n:'',a:''})}
 function saveInc(){S.inc[ym()]=[...document.querySelectorAll('#incs .rl')].map(d=>{const i=d.querySelectorAll('input');return{n:i[0].value.trim(),a:+i[1].value||0}}).filter(x=>x.a);save();closeSheet();render()}
-function goHome(){V.tab='bills';V.g=null;V.yr=false;V.sc='all';V.y=now.getFullYear();V.m=now.getMonth()}
+function goHome(){V.wc='all';V.tab='bills';V.g=null;V.yr=false;V.sc='all';V.y=now.getFullYear();V.m=now.getMonth()}
 function quick(id,k){const b=S.bills.find(x=>x.id==id),cur=status(b,k)=='paid',r=S.pay[id+'|'+k]=S.pay[id+'|'+k]||{};if(cur){delete r.date;delete r.setd;if(b.auto)r.paid=false;else delete r.paid}else{r.paid=true;r.date=r.date||today();delete r.setd}save();render()}
 function payEd(id,k){const b=S.bills.find(x=>x.id===id),r=rec(b,k),st0=r.setd?'set':status(b,k)=='paid'?'paid':'none',p=(b.card&&S.per[b.card+'|'+k])||{};
  sheet(`<h2>${esc(b.name)} · ${MN[+k.slice(5)-1]}</h2>${b.det?`<p class=mut>📝 ${esc(b.det)}</p>`:''}
@@ -174,7 +193,7 @@ function savePay(id,k){const b=S.bills.find(x=>x.id===id),st=g('ps2');let dt=g('
 function editBill(id,gq){const b=S.bills.find(x=>x.id===id)||{type:'fixed',grp:gq||'util',amt:'',due:'',via:'',det:'',end:'',card:'',chg:'',from:ym()};
  sheet(`<h2>${id?'Edit':'New'} bill</h2><label>Name<input id=bn value="${esc(b.name||'')}"></label>
  <label>Type<select id=bt><option value=fixed ${b.type=='fixed'?'selected':''}>Fixed amount</option><option value=var ${b.type!='fixed'?'selected':''}>Varies monthly</option></select></label>
- <label>Group<select id=bg>${Object.entries(GRP).map(e=>`<option value=${e[0]} ${grpOf(b)==e[0]?'selected':''}>${e[1]}</option>`).join('')}</select></label>
+ <label>Group<select id=bg>${Object.entries(GRP).filter(e=>e[0]!='wal').map(e=>`<option value=${e[0]} ${grpOf(b)==e[0]?'selected':''}>${e[1]}</option>`).join('')}</select></label>
  <label class=chk><input id=bh type=checkbox ${b.adhoc?'checked':''}> Ad-hoc (only some months)</label>
  <label class=chk><input id=bauto type=checkbox ${b.auto?'checked':''}> Auto-pay (GIRO / auto-debit) - counts as paid on the due date</label>
  <label>Usual amount (RM)<input id=ba type=number step=0.01 inputmode=decimal value="${b.amt}"></label>
@@ -183,8 +202,8 @@ function editBill(id,gq){const b=S.bills.find(x=>x.id===id)||{type:'fixed',grp:g
  <label>Details (account no., location…)<textarea id=bx rows=2>${esc(b.det)}</textarea></label>
  <label>Starts from<input id=bf type=month value="${b.from||''}"></label>
  <label>Ends after (optional)<input id=be type=month value="${b.end||''}"></label>
- <label>Charged to card (adds to that card's spend on the due date)<select id=bch><option value="">None</option>${S.cards.filter(c=>cardOn(c,ymNow())||c.id==b.chg).map(c=>`<option value=${c.id} ${b.chg==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
- <label>Card being paid (card payment bills only: amount follows its statement)<select id=bc><option value="">None</option>${S.cards.map(c=>`<option value=${c.id} ${b.card==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+ <label>Charged to card / e-wallet (adds to its spend on the due date)<select id=bch><option value="">None</option>${S.cards.filter(c=>cardOn(c,ymNow())||c.id==b.chg).map(c=>`<option value=${c.id} ${b.chg==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+ <label>Card being paid (card payment bills only: amount follows its statement)<select id=bc><option value="">None</option>${S.cards.filter(c=>!c.w).map(c=>`<option value=${c.id} ${b.card==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
  <div class=two><label>⏸ Pause from<input id=bpa type=month value="${b.pa||''}"></label><label>Pause until (last paused month)<input id=bpb type=month value="${b.pb||''}"></label></div><small class=mut>A paused bill is hidden for that period and shows again afterwards.</small>
  <div class=btns>${id?`<button class=bad onclick="delBill('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveBill('${id||''}')">Save</button></div>`)}
 function saveBill(id){const o={name:g('bn')||'Bill',grp:g('bg'),adhoc:$('#bh').checked,auto:$('#bauto').checked,type:g('bt'),amt:+g('ba')||0,due:+g('bd')||'',via:g('bv'),det:g('bx'),from:g('bf'),end:g('be'),card:g('bg')=='card'?g('bc'):'',chg:g('bch'),pa:g('bpa'),pb:g('bpb')};
@@ -194,7 +213,7 @@ function delBill(id){if(confirm('Delete this bill and its payment history?')){S.
 /* ---------- card spend ---------- */
 const cname=id=>(S.cards.find(c=>c.id===id)||{name:'?'}).name;
 function billSp(){const out=[],y1=V.y+1;S.bills.forEach(b=>{if(!b.chg)return;for(let y=+((b.from||'2026').slice(0,4));y<=y1;y++)for(let m=0;m<12;m++){const k=ym(y,m);if(!active(b,k))continue;const a=amtOf(b,k);if(!(a>0))continue;
-  const d=Math.min(+b.due||1,new Date(y,m+1,0).getDate()),id='bill:'+b.id+'|'+k;out.push({id,vb:b.id,vk:k,date:rec(b,k).due||k+'-'+pad(d),card:b.chg,cat:'Bills',amt:a,where:b.name,chk:!!S.vck[id]})}});return out}
+  const d=Math.min(+b.due||1,new Date(y,m+1,0).getDate()),id='bill:'+b.id+'|'+k;out.push({id,vb:b.id,vk:k,date:rec(b,k).due||k+'-'+pad(d),card:b.chg,cat:'Bills',tc:'Bills',amt:a,where:b.name,chk:!!S.vck[id]})}});return out}
 const allSp=()=>_c||(_c=S.sp.concat(billSp()));
 function calc(c,l){let sp=0;const by={},rbc={},R=c.rules||[];
  l.forEach(x=>{sp+=x.amt;by[x.cat]=(by[x.cat]||0)+x.amt;const r=R.find(r=>r.cat==x.cat);rbc[x.cat]=(rbc[x.cat]||0)+x.amt*(r?+r.rate||0:+c.base||0)/100});
@@ -203,92 +222,128 @@ function calc(c,l){let sp=0;const by={},rbc={},R=c.rules||[];
 const cardStats=(c,k)=>calc(c,allSp().filter(x=>x.card===c.id&&x.date.startsWith(k)));
 const sumA=l=>l.reduce((s,x)=>s+x.amt,0);
 const ckList=(cid,k)=>{const p=(S.per||{})[cid+'|'+k]||{};return allSp().filter(x=>x.card==cid&&(p.a&&p.b?x.date>=p.a&&x.date<=p.b:x.date.startsWith(k))).sort((a,b)=>a.date.localeCompare(b.date))};
-const spRow=x=>`<div class=row onclick="${x.vb?`payEd('${x.vb}','${x.vk}')`:`editSp('${x.id}')`}" style="border-left-color:var(--pri)"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked)"><div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`;
+const spRow=x=>`<div class=row onclick="${x.vb?`payEd('${x.vb}','${x.vk}')`:`editSp('${x.id}')`}" style="border-left-color:var(--pri)"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked)"><div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(cname(x.card))} · ${esc(catLbl(x))}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`;
 function tick(id,v,cid,k){if(id.startsWith('bill:'))S.vck[id]=v;else S.sp.find(s=>s.id===id).chk=v;save();if(cid)ckSum(cid,k);else if(!$('#sh'))render()}
-function spendView(){const k=ym(),cs=S.cards.filter(c=>cardOn(c,k)||allSp().some(x=>x.card===c.id&&x.date.startsWith(k)));
- const L=allSp().filter(x=>x.date.startsWith(k)&&(V.sc=='all'||x.card==V.sc)),tot=sumA(L);
- let h=nav(0)+`<div class=chips><button class="${V.sc=='all'?'on':''}" onclick="V.sc='all';render()">All cards</button>`+cs.map(c=>`<button class="${V.sc==c.id?'on':''}" onclick="V.sc='${c.id}';render()">${esc(c.name)}</button>`).join('')+'</div>'
- +`<div class=chips><button class="${V.sv!='list'?'on':''}" onclick="V.sv='cal';render()">📅 Calendar</button><button class="${V.sv=='list'?'on':''}" onclick="V.sv='list';render()">☰ List</button><button class=sm style="margin-left:auto" onclick="sortEd()">⇅ Order cards</button></div>`;
- if(V.sv=='list'){const ds=[...new Set(L.map(x=>x.date))].sort().reverse();
-  h+=ds.length?ds.map(d=>{const l=L.filter(x=>x.date==d);return`<h3><span>${+d.slice(8)} ${MN[V.m]}</span><span>${rm(sumA(l))}</span></h3>`+l.map(spRow).join('')}).join(''):'<p class=mut style="text-align:center">No spending recorded this month</p>'}
- else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},ct={},un={};
-  L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;ct[d]=(ct[d]||0)+1;if(!x.chk)un[d]=1});
-  h+='<div class=cal>'+'MTWTFSS'.split('').map(d=>`<b class=wk>${d}</b>`).join('')+'<i></i>'.repeat(first);
-  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?(un[d]?'has red':'has grn'):''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${fmt2(dt[d])}</small>`:''}</button>`;
-  h+='</div><p class=mut style="text-align:center">Tap a date to see its transactions</p>'}
- return h+`<h3><span>Month total</span><span>${rm(tot)}</span></h3>`+cs.map(c=>{const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget||0,p=S.per[c.id+'|'+k]||{},cl=ckList(c.id,k),ck=cl.filter(x=>x.chk),tt=sumA(ck),df=st!=null&&st!==''?st-tt:null,hasR=(c.rules||[]).some(r=>+r.rate)||+c.base;
-  return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}
-  ${hasR?'':`<small>${Object.entries(t.by).map(([a,v])=>a+' '+v.toFixed(0)).join(' · ')||'No spend yet'}</small>`}
-  <div class=rb>${hasR?(t.det.map(d=>`<div class="rbr ${d.capped?'cp':''}"><span>${esc(d.cat)} · RM ${d.sp.toFixed(2)} × ${d.rate}%</span><span>${rm(d.rb)}${d.capped?' · cap reached':''}</span></div>`).join('')||'<small>No spend yet</small>')+`<div class="rbr tot ${t.capped?'cp':''}"><span>Total rebate${t.capped?' · card cap '+c.cap+' reached':''}</span><b class="${t.capped?'cp':'ok'}">${rm(t.rb)}</b></div>`:'<span class=mut>No rebate on this card</span>'}</div>
+const wbal=(c,k)=>(+c.open||0)+sumA(S.tu.filter(t=>t.w==c.id&&t.date<=k+'-31'))-sumA(allSp().filter(x=>x.card==c.id&&x.date<=k+'-31'));
+const tuRow=t=>`<div class=row onclick="tuEd('${t.id}')" style="border-left-color:var(--bl)"><div class=d>⬆</div><div class=mid><b>Top-up · ${esc(cname(t.w))}</b><small>${esc(t.src||'')}${t.note?' · '+esc(t.note):''}</small></div><div class=rt><b class=ok>+${rm(t.amt)}</b></div></div>`;
+function chartView(src){const all=V.cs=='all',M=Array.from({length:12},()=>TC.map(()=>0));
+ src.forEach(x=>{if(!x.date.startsWith(V.y+'-'))return;const m=+x.date.slice(5,7)-1,i=TC.indexOf(tcOf(x));M[m][i<0?4:i]+=x.amt});
+ const mt=M.map(r=>r.reduce((a,b)=>a+b,0)),mx=Math.max(1,...mt),W=340,H=170,L0=34,sl=(W-L0)/12,bw=sl*.62,sc=(H-30)/mx;
+ let svg=`<svg class=ch viewBox="0 0 ${W} ${H}" width="100%">`;
+ [0,.5,1].forEach(f=>{const y=H-20-(H-30)*f;svg+=`<line x1="${L0}" x2="${W}" y1="${y}" y2="${y}" class=gl /><text x="${L0-4}" y="${y+3}" text-anchor="end">${fmtK(mx*f)}</text>`});
+ M.forEach((r,m)=>{let y=H-20;const x=L0+m*sl+(sl-bw)/2;
+  r.forEach((v,i)=>{if(v<=0)return;const hh=v*sc;y-=hh;svg+=`<rect x="${x}" y="${y}" width="${bw}" height="${hh}" fill="${TCOL[i]}" />`});
+  if(m==V.m)svg+=`<rect x="${L0+m*sl+1}" y="2" width="${sl-2}" height="${H-22}" class=sel />`;
+  svg+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" class="${m==V.m?'cur':''}">${MN[m][0]}</text><rect x="${L0+m*sl}" y="0" width="${sl}" height="${H-14}" fill="transparent" onclick="V.m=${m};render()" />`});
+ svg+='</svg>';const cm=M[V.m],ct=mt[V.m];
+ return`<div class=chips><button class="${!all?'on':''}" onclick="V.cs='page';render()">This page</button><button class="${all?'on':''}" onclick="V.cs='all';render()">Cards + e-wallets</button></div>
+ <div class=card><b>${V.y} spending by type</b><small class=mut> · tap a month</small>${svg}<div class=leg>${TC.map((t,i)=>`<span><i style="background:${TCOL[i]}"></i>${t}</span>`).join('')}</div></div>
+ <div class=card><div class=hd><b>${MN[V.m]} ${V.y}</b><b>${rm(ct)}</b></div>${TC.map((t,i)=>{const v=cm[i],p=ct?Math.round(v/ct*100):0;return`<div class=tb><span>${t}</span><div class=tbar><i style="width:${p}%;background:${TCOL[i]}"></i></div><b>${fmt2(v)}</b><small>${p}%</small></div>`}).join('')}</div>`}
+function panel(c,k,w){const t=cardStats(c,k),st=S.stmt[c.id+'|'+k],bud=+c.budget||0,p=S.per[c.id+'|'+k]||{},cl=ckList(c.id,k),ck=cl.filter(x=>x.chk),tt=sumA(ck),df=st!=null&&st!==''?st-tt:null,hasR=(c.rules||[]).some(r=>+r.rate)||+c.base;let mid;
+ if(w){const bt={};allSp().filter(x=>x.card===c.id&&x.date.startsWith(k)).forEach(x=>{bt[tcOf(x)]=(bt[tcOf(x)]||0)+x.amt});const tk=sumA(S.tu.filter(u=>u.w==c.id&&u.date.startsWith(k)));
+  mid=`<small>${Object.entries(bt).map(([a,v])=>a+' '+v.toFixed(2)).join(' · ')||'No spend yet'}</small><div class=rb><div class=rbr><span>Top-ups this month</span><b class=ok>+${rm(tk)}</b></div><div class="rbr tot"><span>Balance at end of month</span><b>${rm(wbal(c,k))}</b></div></div>`}
+ else mid=`${hasR?'':`<small>${Object.entries(t.by).map(([a,v])=>a+' '+v.toFixed(0)).join(' · ')||'No spend yet'}</small>`}
+  <div class=rb>${hasR?(t.det.map(d=>`<div class="rbr ${d.capped?'cp':''}"><span>${esc(d.cat)} · RM ${d.sp.toFixed(2)} × ${d.rate}%</span><span>${rm(d.rb)}${d.capped?' · cap reached':''}</span></div>`).join('')||'<small>No spend yet</small>')+`<div class="rbr tot ${t.capped?'cp':''}"><span>Total rebate${t.capped?' · card cap '+c.cap+' reached':''}</span><b class="${t.capped?'cp':'ok'}">${rm(t.rb)}</b></div>`:'<span class=mut>No rebate on this card</span>'}</div>`;
+ return`<div class=card><div class=hd><b>${esc(c.name)}</b><span>${rm(t.sp)}${bud?' / '+bud:''}</span></div>${bud?`<div class=bar><i style="width:${Math.min(100,t.sp/bud*100)}%" class="${t.sp>bud?'over':''}"></i></div>`:''}${mid}
   <div class=stm>Statement <input type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${c.id}','${k}',this.value)"><button class=sm onclick="checkEd('${c.id}','${k}')">Cross-check ›</button></div>
-  <small class=mut>${p.a&&p.b?'Period '+p.a.slice(8)+'/'+p.a.slice(5,7)+' – '+p.b.slice(8)+'/'+p.b.slice(5,7)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small></div>`}).join('')+'<button class=fab onclick="editSp()">+</button>'}
-function sortEd(){sheet(`<h2>Card order</h2><div id=so></div><div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);soDraw()}
-function soDraw(){const k=ym();$('#so').innerHTML=S.cards.map((c,i)=>({c,i})).filter(o=>cardOn(o.c,k)).map(o=>`<div class=row style="border-left-color:var(--pri)"><div class=mid><b>${esc(o.c.name)}</b></div><button onclick="mvCard(${o.i},-1)">▲</button><button onclick="mvCard(${o.i},1)">▼</button></div>`).join('')}
-function mvCard(i,d){const k=ym();let j=i+d;while(S.cards[j]&&!cardOn(S.cards[j],k))j+=d;if(!S.cards[j])return;[S.cards[i],S.cards[j]]=[S.cards[j],S.cards[i]];save();soDraw()}
-function dayEd(d){const dt=ym()+'-'+pad(d),l=allSp().filter(x=>x.date==dt);
- sheet(`<h2>${d} ${MN[V.m]} ${V.y}</h2>${l.length?l.map(spRow).join('')+`<p style="text-align:right"><b>Day total ${rm(sumA(l))}</b></p>`:'<p class=mut>No spending on this day</p>'}<div class=btns><button onclick="closeSheet();render()">Close</button><button class=pri onclick="editSp(null,'${dt}')">+ Add spend</button></div>`)}
+  <small class=mut>${p.a&&p.b?'Period '+fmtD(p.a)+' – '+fmtD(p.b)+' · ':''}Ticked ${ck.length}/${cl.length} · ${rm(tt)} ${df==null?'':Math.abs(df)<0.005?'<b class=ok>✓ matches statement</b>':`<b class=bad>· ${df.toFixed(2)} left to match</b>`}</small></div>`}
+function spendView(w){w=!!w;const k=ym(),sk=w?'wc':'sc',cur=V[sk],sv=V.sv=='list'||V.sv=='chart'?V.sv:'cal',AN=w?'wallets':'cards';
+ const cs=S.cards.filter(c=>!!c.w==w&&(cardOn(c,k)||allSp().some(x=>x.card===c.id&&x.date.startsWith(k))));
+ const pageAll=allSp().filter(x=>isW(x.card)==w),L=pageAll.filter(x=>x.date.startsWith(k)&&(cur=='all'||x.card==cur)),tot=sumA(L);
+ const TU=w?S.tu.filter(t=>t.date.startsWith(k)&&(cur=='all'||t.w==cur)):[],tuTot=sumA(TU);
+ let h=nav(0)+`<div class=chips><button class="${cur=='all'?'on':''}" onclick="V.${sk}='all';render()">All ${AN}</button>`+cs.map(c=>`<button class="${cur==c.id?'on':''}" onclick="V.${sk}='${c.id}';render()">${esc(c.name)}</button>`).join('')+'</div>'
+ +`<div class=chips><button class="${sv=='cal'?'on':''}" onclick="V.sv='cal';render()">📅 Calendar</button><button class="${sv=='list'?'on':''}" onclick="V.sv='list';render()">☰ List</button><button class="${sv=='chart'?'on':''}" onclick="V.sv='chart';render()">📊 Chart</button><button class=sm style="margin-left:auto" onclick="sortEd(${w?1:0})">⇅ Order</button></div>`;
+ if(sv=='chart')h+=chartView(V.cs=='all'?allSp():pageAll.filter(x=>cur=='all'||x.card==cur));
+ else if(sv=='list'){const ds=[...new Set(L.map(x=>x.date).concat(TU.map(t=>t.date)))].sort().reverse();
+  h+=ds.length?ds.map(d=>{const l=L.filter(x=>x.date==d),tl=TU.filter(t=>t.date==d);return`<h3><span>${+d.slice(8)} ${MN[V.m]}</span><span>${rm(sumA(l))}</span></h3>`+tl.map(tuRow).join('')+l.map(spRow).join('')}).join(''):'<p class=mut style="text-align:center">Nothing recorded this month</p>'}
+ else{const first=(new Date(V.y,V.m,1).getDay()+6)%7,n=new Date(V.y,V.m+1,0).getDate(),dt={},un={},tu={};
+  L.forEach(x=>{const d=+x.date.slice(8);dt[d]=(dt[d]||0)+x.amt;if(!x.chk)un[d]=1});TU.forEach(t=>{const d=+t.date.slice(8);tu[d]=(tu[d]||0)+t.amt});
+  h+='<div class=cal>'+'MTWTFSS'.split('').map(d=>`<b class=wk>${d}</b>`).join('')+'<i></i>'.repeat(first);
+  for(let d=1;d<=n;d++)h+=`<button class="day ${dt[d]?(un[d]?'has red':'has grn'):''} ${tu[d]?'tup':''} ${ym()+'-'+pad(d)==today()?'tdy':''}" onclick="dayEd(${d})"><span>${d}</span>${dt[d]?`<small>${fmt2(dt[d])}</small>`:''}${tu[d]?`<em>⬆${fmt2(tu[d])}</em>`:''}</button>`;
+  h+=`</div><p class=mut style="text-align:center">Tap a date to see its transactions${w?' or add a top-up':''}</p>`}
+ return h+`<h3><span>Month spend</span><span>${rm(tot)}</span></h3>`+(w?`<h3><span>Top-ups</span><span>${rm(tuTot)}</span></h3>`:'')+cs.map(c=>panel(c,k,w)).join('')+(w?'<button class="fab fab2" onclick="tuEd()">⬆</button>':'')+'<button class=fab onclick="editSp()">+</button>'}
+function sortEd(w){V.so=!!w;sheet(`<h2>${w?'E-wallet':'Card'} order</h2><div id=so></div><div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);soDraw()}
+function soDraw(){const k=ym();$('#so').innerHTML=S.cards.map((c,i)=>({c,i})).filter(o=>cardOn(o.c,k)&&!!o.c.w==V.so).map(o=>`<div class=row style="border-left-color:var(--pri)"><div class=mid><b>${esc(o.c.name)}</b></div><button onclick="mvCard(${o.i},-1)">▲</button><button onclick="mvCard(${o.i},1)">▼</button></div>`).join('')}
+function mvCard(i,d){const k=ym();let j=i+d;while(S.cards[j]&&(!cardOn(S.cards[j],k)||!!S.cards[j].w!=V.so))j+=d;if(!S.cards[j])return;[S.cards[i],S.cards[j]]=[S.cards[j],S.cards[i]];save();soDraw()}
+function dayEd(d){const w=V.tab=='wallet',dt=ym()+'-'+pad(d),l=allSp().filter(x=>x.date==dt&&isW(x.card)==w),tl=w?S.tu.filter(t=>t.date==dt):[];
+ sheet(`<h2>${d} ${MN[V.m]} ${V.y}</h2>${tl.map(tuRow).join('')}${l.length?l.map(spRow).join('')+`<p style="text-align:right"><b>Day spend ${rm(sumA(l))}</b></p>`:(tl.length?'':'<p class=mut>Nothing on this day</p>')}<div class=btns><button onclick="closeSheet();render()">Close</button><button class=pri onclick="editSp(null,'${dt}')">+ Spend</button>${w?`<button class=pri style="background:var(--bl);border-color:var(--bl)" onclick="tuEd(null,'${dt}')">⬆ Top up</button>`:''}</div>`)}
+function tuList(w,k){const l=S.tu.filter(t=>t.w==w&&t.date.startsWith(k)).sort((a,b)=>a.date.localeCompare(b.date));
+ sheet(`<h2>${esc(cname(w))} top-ups · ${MN[+k.slice(5)-1]}</h2>${l.map(tuRow).join('')||'<p class=mut>No top-ups this month</p>'}<p style="text-align:right"><b>Total ${rm(sumA(l))}</b></p><div class=btns><button onclick="closeSheet()">Close</button><button class=pri onclick="tuEd(null,'${k==ymNow()?today():k+'-01'}','${w}')">+ Top up</button></div>`)}
+function tuEd(id,dt,wid){const x=S.tu.find(t=>t.id===id)||{date:dt||(ym()==ymNow()?today():ym()+'-01'),w:wid||(V.wc!='all'?V.wc:(S.cards.find(c=>c.w&&cardOn(c,ymNow()))||{}).id),amt:'',src:'',note:''};
+ sheet(`<h2>${id?'Edit':'New'} top-up</h2><label>Date<input id=td type=date value="${x.date}"></label>
+ <label>E-wallet<select id=tw>${S.cards.filter(c=>c.w&&(cardOn(c,x.date.slice(0,7))||c.id==x.w)).map(c=>`<option value=${c.id} ${c.id==x.w?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+ <label>Amount (RM)<input id=ta type=number step=0.01 inputmode=decimal value="${x.amt}"></label>
+ <label>Topped up from${platSel('ts',x.src)}</label><label>Remark<input id=tn value="${esc(x.note)}"></label>
+ <div class=btns>${id?`<button class=bad onclick="delTu('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveTu('${id||''}')">Save</button></div>`)}
+function saveTu(id){const o={date:g('td'),w:g('tw'),amt:+g('ta')||0,src:g('ts'),note:g('tn')};if(!o.date||!o.amt||!o.w)return alert('Date, e-wallet and amount needed');
+ if(id)Object.assign(S.tu.find(t=>t.id===id),o);else S.tu.push({id:uid(),...o});save();closeSheet();render()}
+function delTu(id){S.tu=S.tu.filter(t=>t.id!==id);save();closeSheet();render()}
 function checkEd(cid,k){const c=S.cards.find(x=>x.id===cid),p=S.per[cid+'|'+k]||{},st=S.stmt[cid+'|'+k];
  sheet(`<h2>${esc(c.name)} · ${MN[+k.slice(5)-1]} statement</h2>
  <div class=two><label>Period from<input id=pa type=date value="${p.a||''}" onchange="setPer('${cid}','${k}')"></label><label>Period to<input id=pb type=date value="${p.b||''}" onchange="setPer('${cid}','${k}')"></label></div>
  <label>Statement amount (RM)<input id=ps type=number step=0.01 inputmode=decimal value="${st??''}" onchange="setStmt('${cid}','${k}',this.value,1)"></label>
  <div id=ckSum class=card style="margin-top:10px"></div><div id=ckL></div>
  <div class=btns><button class=pri onclick="closeSheet();render()">Done</button></div>`);ckDraw(cid,k)}
-function ckDraw(cid,k){$('#ckL').innerHTML=ckList(cid,k).map(x=>`<div class=row style="border-left-color:var(--pri)" onclick="this.querySelector('input').click()"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked,'${cid}','${k}')"><div class=d>${x.date.slice(8)}/${x.date.slice(5,7)}</div><div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(x.cat)}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`).join('')||'<p class=mut>No transactions in this period</p>';ckSum(cid,k)}
+function ckDraw(cid,k){$('#ckL').innerHTML=ckList(cid,k).map(x=>`<div class=row style="border-left-color:var(--pri)" onclick="this.querySelector('input').click()"><input type=checkbox class=tk ${x.chk?'checked':''} onclick="event.stopPropagation()" onchange="tick('${x.id}',this.checked,'${cid}','${k}')"><div class=d>${x.date.slice(8)}/${x.date.slice(5,7)}</div><div class=mid><b>${x.vb?'🔁 ':''}${esc(x.where||x.cat)}</b><small>${esc(catLbl(x))}</small></div><div class=rt><b>${rm(x.amt)}</b></div></div>`).join('')||'<p class=mut>No transactions in this period</p>';ckSum(cid,k)}
 function ckSum(cid,k){const c=S.cards.find(x=>x.id===cid),l=ckList(cid,k),t=l.filter(x=>x.chk),T=sumA(l),tt=sumA(t),st=S.stmt[cid+'|'+k],df=st!=null&&st!==''?st-tt:null;
- $('#ckSum').innerHTML=`Recorded <b>${l.length}</b> items · ${rm(T)}<br>Ticked <b>${t.length}</b> · ${rm(tt)}<br>Not ticked <b>${l.length-t.length}</b> · ${rm(T-tt)}<br>${df==null?'<span class=mut>Enter the statement amount to compare</span>':Math.abs(df)<0.005?'<b class=ok>✓ Ticked total matches the statement</b>':`<b class=bad>Statement − ticked = ${df.toFixed(2)}</b>`}<br>Est. rebate for this period <b class=ok>${rm(calc(c,l).rb)}</b>`}
+ $('#ckSum').innerHTML=`Recorded <b>${l.length}</b> items · ${rm(T)}<br>Ticked <b>${t.length}</b> · ${rm(tt)}<br>Not ticked <b>${l.length-t.length}</b> · ${rm(T-tt)}<br>${df==null?'<span class=mut>Enter the statement amount to compare</span>':Math.abs(df)<0.005?'<b class=ok>✓ Ticked total matches the statement</b>':`<b class=bad>Statement − ticked = ${df.toFixed(2)}</b>`}${c.w?'':`<br>Est. rebate for this period <b class=ok>${rm(calc(c,l).rb)}</b>`}`}
 function setPer(cid,k){S.per[cid+'|'+k]={a:g('pa'),b:g('pb')};save();ckDraw(cid,k)}
 function setStmt(c,k,v,inSheet){S.stmt[c+'|'+k]=v===''?null:+v;save();inSheet?ckSum(c,k):render()}
 function catOpts(cid,cur){const c=S.cards.find(x=>x.id==cid)||{rules:[]},l=[...(c.rules||[]).map(r=>r.cat),'Others'];if(cur&&!l.includes(cur))l.push(cur);return l.map(a=>`<option ${a==cur?'selected':''}>${esc(a)}</option>`).join('')}
-function editSp(id,dt){const x=S.sp.find(s=>s.id===id)||{date:dt||(ym()==ym(now.getFullYear(),now.getMonth())?today():ym()+'-01'),card:V.sc!='all'?V.sc:(S.cards.find(c=>cardOn(c,ymNow()))||{}).id,cat:'',amt:'',where:''};
+function editSp(id,dt){const ex=S.sp.find(s=>s.id===id),w=ex?isW(ex.card):V.tab=='wallet',cur=V[w?'wc':'sc'];
+ const x=ex||{date:dt||(ym()==ymNow()?today():ym()+'-01'),card:cur!='all'?cur:(S.cards.find(c=>!!c.w==w&&cardOn(c,ymNow()))||{}).id,cat:'',tc:'',amt:'',where:''};
  sheet(`<h2>${id?'Edit':'Add'} spend</h2><label>Date<input id=sd type=date value="${x.date}"></label>
- <label>Card<select id=sc onchange="$('#st').innerHTML=catOpts(this.value,'')">${S.cards.filter(c=>cardOn(c,x.date.slice(0,7))||c.id==x.card).map(c=>`<option value=${c.id} ${c.id==x.card?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
- <label>Category<select id=st>${catOpts(x.card,x.cat)}</select></label>
+ <label>${w?'E-wallet':'Card'}<select id=sc onchange="$('#st').innerHTML=catOpts(this.value,'');$('#st').onchange()">${S.cards.filter(c=>!!c.w==w&&(cardOn(c,x.date.slice(0,7))||c.id==x.card)).map(c=>`<option value=${c.id} ${c.id==x.card?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+ <label ${w?'style="display:none"':''}>Rebate category<select id=st onchange="if(TCMAP[this.value])$('#tc').value=TCMAP[this.value]">${catOpts(x.card,x.cat)}</select></label>
+ <label>Type<select id=tc>${TC.map(t=>`<option ${t==(x.tc||(ex?tcOf(x):'Others'))?'selected':''}>${t}</option>`).join('')}</select></label>
  <label>Amount (RM)<input id=sa type=number step=0.01 inputmode=decimal value="${x.amt}"></label>
  <label>Where / what<input id=sw value="${esc(x.where)}"></label>
  <label class=chk><input id=sk type=checkbox ${x.chk?'checked':''}> Checked against statement</label>
- <div class=btns>${id?`<button class=bad onclick="delSp('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveSp('${id||''}')">Save</button></div>`)}
-function saveSp(id){const o={date:g('sd'),card:g('sc'),cat:g('st'),amt:+g('sa')||0,where:g('sw'),chk:$('#sk').checked};if(!o.date||!o.amt)return alert('Date and amount needed');
+ <div class=btns>${id?`<button class=bad onclick="delSp('${id}')">Delete</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveSp('${id||''}')">Save</button></div>`);if(!ex)$('#st').onchange()}
+function saveSp(id){const o={date:g('sd'),card:g('sc'),cat:g('st'),tc:g('tc'),amt:+g('sa')||0,where:g('sw'),chk:$('#sk').checked};if(!o.date||!o.amt)return alert('Date and amount needed');
  if(id)Object.assign(S.sp.find(s=>s.id===id),o);else S.sp.push({id:uid(),...o});save();closeSheet();render()}
 function delSp(id){S.sp=S.sp.filter(s=>s.id!==id);save();closeSheet();render()}
 
 /* ---------- cards & backup ---------- */
-function setView(){const k=ymNow(),act=S.cards.filter(c=>cardOn(c,k)),rem=S.cards.filter(c=>!cardOn(c,k));
+function setView(){const k=ymNow(),A=S.cards.filter(c=>!c.w),act=A.filter(c=>cardOn(c,k)),rem=A.filter(c=>!cardOn(c,k)),WL=S.cards.filter(c=>c.w),wa=WL.filter(c=>cardOn(c,k)),wr=WL.filter(c=>!cardOn(c,k));
  const rules=c=>{const R=(c.rules||[]).filter(r=>+r.rate||+r.cap).map(r=>r.cat+' '+r.rate+'%'+(+r.cap?' (cap '+r.cap+')':'')),o=+c.base?'others '+c.base+'%':'';const t=[...R,o].filter(Boolean).join(' · ');return(t||'No rebate')+(+c.cap?' · total cap '+c.cap:'')};
- const cr=c=>`<div class=row onclick="editCard('${c.id}')" style="border-left-color:var(--pri)"><div class=mid><b>${esc(c.name)}</b><small>${esc(rules(c))}</small></div><div class=rt>${c.budget?rm(c.budget):''}</div></div>`;
+ const cr=c=>`<div class=row onclick="editCard('${c.id}')" style="border-left-color:var(--pri)"><div class=mid><b>${esc(c.name)}</b><small>${c.w?'Opening balance '+rm(c.open||0):esc(rules(c))}</small></div><div class=rt>${c.budget?rm(c.budget):''}</div></div>`;
  return'<h2>Cards</h2>'+act.map(cr).join('')+`<button class=add onclick="editCard()">+ Add card</button>`+(rem.length?`<h3><span>Removed cards (records kept)</span></h3>`+rem.map(cr).join(''):'')
- +`<h2>Payment platforms</h2><input value="${esc(S.plat.join(', '))}" onchange="setPlat(this.value)"><p class=mut>These appear in the "Paid via" dropdown.</p>
+ +'<h2>E-wallets</h2>'+wa.map(cr).join('')+`<button class=add onclick="editCard(null,1)">+ Add e-wallet</button>`+(wr.length?`<h3><span>Removed e-wallets (records kept)</span></h3>`+wr.map(cr).join(''):'')
+ +`<h2>Payment platforms</h2><input value="${esc(S.plat.join(', '))}" onchange="setPlat(this.value)"><p class=mut>These appear in the "Paid via" and "Topped up from" dropdowns.</p>
  <h2>Backup</h2><div class=btns><button onclick="exportJ()">Export backup</button><button onclick="$('#imp').click()">Import</button><button onclick="exportC()">Spend CSV</button></div>
  ${user?`<h2>Account</h2><p class=mut>${esc(user.email)} · <span id=sy>${syncMsg}</span></p><button onclick="logout()">Log out</button>`:''}<input id=imp type=file accept=".json,application/json" hidden onchange="importJ(this)"><p class=mut>Data is stored online in your account (and cached on this device). Export a backup now and then.</p>`}
 function setPlat(v){S.plat=[...new Set(v.split(',').map(x=>x.trim()).filter(Boolean))];save();render()}
 const ruleRow=r=>`<div class=rl><input placeholder="Category" value="${esc(r.cat)}"><input type=number step=0.01 inputmode=decimal placeholder="%" value="${r.rate}"><input type=number inputmode=decimal placeholder="Cap" value="${r.cap||''}"><button onclick="this.parentNode.remove()">✕</button></div>`;
-function editCard(id){const c=S.cards.find(x=>x.id===id)||{name:'',budget:'',cap:'',rules:[],base:0,from:ymNow(),end:''};
- sheet(`<h2>${id?'Edit':'New'} card</h2><label>Name (e.g. UOB 1071)<input id=cn value="${esc(c.name)}"></label>
+function editCard(id,w){const c=S.cards.find(x=>x.id===id)||{name:'',budget:'',cap:'',rules:[],base:0,open:'',from:ymNow(),end:'',w:w?true:undefined},W=!!c.w,T=W?'e-wallet':'card';
+ sheet(`<h2>${id?'Edit':'New'} ${T}</h2><label>Name (e.g. ${W?'TnG':'UOB 1071'})<input id=cn value="${esc(c.name)}"></label>
+ ${W?`<label>Opening balance (RM)<input id=cop type=number step=0.01 inputmode=decimal value="${c.open||''}"></label>`:''}
  <label>Monthly spend budget (RM, optional)<input id=cb type=number inputmode=decimal value="${c.budget||''}"></label>
  <div class=two><label>Active from<input id=cf type=month value="${c.from||''}"></label><label>Last active month<input id=ce type=month value="${c.end||''}"></label></div>
- <small class=mut>Leave "last active month" empty while you still use the card. After that month it stops showing, but all its records are kept.</small>
- <h3><span>Rebate rules</span></h3><small class=mut>Category · rebate % · monthly cap in RM (empty = no cap). Leave everything at 0 for a card with no rebate.</small>
+ <small class=mut>Leave "last active month" empty while you still use it. After that month it stops showing, but all its records are kept.</small>
+ ${W?'':`<h3><span>Rebate rules</span></h3><small class=mut>Category · rebate % · monthly cap in RM (empty = no cap). Leave everything at 0 for a card with no rebate.</small>
  <div id=rules>${(c.rules||[]).map(ruleRow).join('')}</div>
  <button class=add onclick="$('#rules').insertAdjacentHTML('beforeend',ruleRow({cat:'',rate:'',cap:''}))">+ Add category rule</button>
  <label>All other spending · rebate %<input id=cbase type=number step=0.01 inputmode=decimal value="${c.base||0}"></label>
- <label>Total monthly rebate cap (RM, empty = no cap)<input id=cp type=number inputmode=decimal value="${c.cap||''}"></label>
- <div class=btns>${id?`<button class=bad onclick="rmCard('${id}')">Remove card</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveCard('${id||''}')">Save</button></div>`)}
-function saveCard(id){const rules=[...document.querySelectorAll('#rules .rl')].map(d=>{const i=d.querySelectorAll('input');return{cat:i[0].value.trim(),rate:+i[1].value||0,cap:+i[2].value||0}}).filter(r=>r.cat);
- const o={name:g('cn')||'Card',budget:+g('cb')||0,cap:+g('cp')||0,rules,base:+g('cbase')||0,from:g('cf'),end:g('ce')};
- if(id)Object.assign(S.cards.find(x=>x.id===id),o);else S.cards.push({id:uid(),...o});save();closeSheet();render()}
+ <label>Total monthly rebate cap (RM, empty = no cap)<input id=cp type=number inputmode=decimal value="${c.cap||''}"></label>`}
+ <div class=btns>${id?`<button class=bad onclick="rmCard('${id}')">Remove</button>`:''}<button onclick="closeSheet()">Cancel</button><button class=pri onclick="saveCard('${id||''}',${W?1:0})">Save</button></div>`)}
+function saveCard(id,W){const gv=i=>{const e=$('#'+i);return e?e.value:''};const rules=[...document.querySelectorAll('#rules .rl')].map(d=>{const i=d.querySelectorAll('input');return{cat:i[0].value.trim(),rate:+i[1].value||0,cap:+i[2].value||0}}).filter(r=>r.cat);
+ const o={name:g('cn')||(W?'E-wallet':'Card'),budget:+g('cb')||0,cap:+gv('cp')||0,rules,base:+gv('cbase')||0,open:+gv('cop')||0,from:g('cf'),end:g('ce')};
+ if(id)Object.assign(S.cards.find(x=>x.id===id),o);else S.cards.push({id:uid(),...o,w:W?true:undefined});save();closeSheet();render()}
 function rmCard(id){const c=S.cards.find(x=>x.id===id),k=ymNow();if(!confirm('Remove '+c.name+' from next month? All past records are kept.'))return;
  c.end=k;S.bills.forEach(b=>{if(b.card==id&&(!b.end||b.end>k))b.end=k});save();closeSheet();render()}
 async function dl(n,t,m){const f=new File([t],n,{type:m});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}catch(e){if(e.name=='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=n;a.click()}
 const exportJ=()=>dl(`mymoney-${today()}.json`,JSON.stringify(S),'application/json');
-const exportC=()=>dl(`spend-${today()}.csv`,'Date,Card,Category,Amount,Where\n'+allSp().slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,cname(x.card),x.cat,x.amt,'"'+(x.where||'').replace(/"/g,'""')+'"'].join(',')).join('\n'),'text/csv');
-function importJ(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.bills||!d.cards)throw 0;if(confirm('Replace all current data with this backup?')){S=d;save();render()}}catch(e){alert('Not a valid backup file')}};r.readAsText(f)}
+const exportC=()=>dl(`spend-${today()}.csv`,'Date,Account,Category,Type,Amount,Where\n'+allSp().slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,cname(x.card),x.cat,tcOf(x),x.amt,'"'+(x.where||'').replace(/"/g,'""')+'"'].join(',')).join('\n'),'text/csv');
+function importJ(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.bills||!d.cards)throw 0;if(confirm('Replace all current data with this backup?')){S=d;migrate();save();render()}}catch(e){alert('Not a valid backup file')}};r.readAsText(f)}
 
 /* ---------- shell ---------- */
 function sheet(h){closeSheet();const d=document.createElement('div');d.id='sh';d.innerHTML=`<div class=bk onclick="closeSheet();render()"></div><div class=pn>${h}</div>`;document.body.appendChild(d)}
 function closeSheet(){const s=$('#sh');if(s)s.remove()}
 function render(){_c=null;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===V.tab));
  if(sb&&!user){$('#app').innerHTML=loginView();return}
- $('#app').innerHTML=V.tab=='bills'?(V.yr?yearView():billsView()):V.tab=='spend'?spendView():setView()}
+ $('#app').innerHTML=V.tab=='bills'?(V.yr?yearView():billsView()):V.tab=='spend'?spendView(0):V.tab=='wallet'?spendView(1):setView()}
 (async()=>{if(window.supabase&&!SB_URL.startsWith('PASTE')){sb=supabase.createClient(SB_URL,SB_KEY);try{const{data}=await sb.auth.getSession();user=data.session?data.session.user:null}catch(e){}}
  if(!S)S=seed();if(migrate())save();render();if(user)pull()})();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user&&!$('#sh'))pull()});
